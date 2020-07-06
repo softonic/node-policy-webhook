@@ -2,4 +2,4 @@
 
 set -ex
 
-GOARCH=${ARCH} go install ./cmd/node-policy-webhook/.../
+GOARCH=${ARCH} go install -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../

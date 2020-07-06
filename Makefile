@@ -1,10 +1,9 @@
-BIN := kube-mgmt
+BIN := node-policy-webhook
 PKG := github.com/softonic/node-policy-webhook
-REGISTRY ?= docker
 VERSION := 0.0.0-dev
 ARCH := amd64
 
-IMAGE := $(REGISTRY)/$(BIN)
+IMAGE := $(BIN)
 
 BUILD_IMAGE ?= golang:1.14-buster
 
@@ -18,7 +17,7 @@ build:
 		-v $$(pwd)/bin/linux_$(ARCH):/go/bin \
 		-w /go/src/$(PKG) \
 		$(BUILD_IMAGE) \
-		/bin/sh -c "ARCH=$(ARCH) VERSION=$(VERSION) ./build/build"
+		/bin/sh -c "ARCH=$(ARCH) VERSION=$(VERSION) PKG=$(PKG) ./build/build"
 
 .PHONY: image
 image: build
