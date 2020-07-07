@@ -28,7 +28,11 @@ image: build
 
 .PHONY: cert
 cert:
-	bash -x ssl/ssl.sh $(APP) $(NAMESPACE)
+	ssl/ssl.sh $(APP) $(NAMESPACE)
+
+.PHONY: apply-patch
+apply-patch:
+	ssl/patch_ca_bundle.sh
 
 .PHONY: clean
 clean:

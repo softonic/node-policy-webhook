@@ -1,0 +1,30 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-policy-webhook
+  labels:
+    app: node-policy-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-policy-webhook
+  template:
+    metadata:
+      name: node-policy-webhook
+      labels:
+        app: node-policy-webhook
+    spec:
+      containers:
+        - name: node-policy-webhook
+          image: santinoncs/node-policy-webhook:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 250m
+              memory: 64Mi
+

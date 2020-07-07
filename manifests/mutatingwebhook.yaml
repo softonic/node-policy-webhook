@@ -1,0 +1,25 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: node-policy-webhook
+  labels:
+    app: node-policy-webhook
+webhooks:
+  - name: node-policy-webhook.default.svc.cluster.local
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM1ekNDQWMrZ0F3SUJBZ0lCQVRBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwdGFXNXAKYTNWaVpVTkJNQjRYRFRJd01EY3dOVEUxTXpFMU9Wb1hEVE13TURjd05ERTFNekUxT1Zvd0ZURVRNQkVHQTFVRQpBeE1LYldsdWFXdDFZbVZEUVRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTlo4Ckg0cUg3V1ZYU2dicUcreFZiejNxMHVMbmRJSlUzQS91MDVsVVJhN0w0NG1aVkdZU0JvS3Q1WSswQ1h1RExCUUYKTlpSZ0xLdVR0UUZOUFpsYi9Gd2NYOWg0blcxbVZQdkprK2RIS3c0a2ZGZGRhRkg4bDB4TnhtWmI0am5UVy8vMwo1N2pPR0JHdS9zUWFjL0IrZVdSSUJTb3VHODR4Vms3bUhqUk9nbWRYelY2enU4TEw1eTRjaVJPSm5iMVhkb2VICk1acHRDcmwzNHROL3R5WStEaTkyWVorT2J6MlpyLys5UG1oZEtkRmpyL1JGVzNUc2NwYUUvdkI0TUxnamxpOXQKQmcyRktjWCs1c0FDOTh5K21FQkVNajI5dVpaSnB1c3M4dlRZdUxCMDU3ZXdxOHF0dkNjMytFanhlN1hNZE1FdgpvZHhZdG9HWkx4cXdFZnpaSGFNQ0F3RUFBYU5DTUVBd0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWRKUVFXCk1CUUdDQ3NHQVFVRkJ3TUNCZ2dyQmdFRkJRY0RBVEFQQmdOVkhSTUJBZjhFQlRBREFRSC9NQTBHQ1NxR1NJYjMKRFFFQkN3VUFBNElCQVFDYzVPbzN2bnlMbW1zMmFwS2xJb1hCeEJJczJhYTFvemhWYm5ZNzhJaEtqZ29ITkg3MgozUTY0MENteFgxT3BNQ1lhUlpMcWFPNlU2TDgvMEJCbkx4alRNeHpEY3IzRFZocDU5SVdMbCtuWU1jK0JOK01JCmduLzNhMnUrOXA2Z1JVWEZIWlNicE04ektyZXhxMXNaL05RR2xuaXRJdGNjMXRlVzF1MWZNeis4bjVJaGhpbDkKQ3l3S3IvanhrVGg0TDJDclRFN1lPTm9rdUpOdko2NHlBb3FBR1VxdjRtMVlxQ2NmaW9DN0RNSndVd2FIUHc0agptQWRZanVqeVpxc2g4QUZ1TjRPV2NRTHBlVWVTMkhkQ3BFWXlGWFZ0WVcwd0doWHd0djYwWDlnZ0h3UkFGY0NDCi9acUxkNXpwK0tjVWZjUENpcUZYc1dOZDZrOHgxVmJ5eklTMwotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        name: node-policy-webhook
+        namespace: default
+        path: "/mutate"
+        port: 443
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    sideEffects: None
+    timeoutSeconds: 5
+    reinvocationPolicy: Never
+    failurePolicy: Fail
