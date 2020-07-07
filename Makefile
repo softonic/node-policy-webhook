@@ -14,7 +14,7 @@ BUILD_IMAGE ?= golang:1.14-buster
 all: image
 
 .PHONY: build
-build:
+build: generate
 	docker run -it \
 		-v $$(pwd):/go/src/$(PKG) \
 		-v $$(pwd)/bin/linux_$(ARCH):/go/bin \
