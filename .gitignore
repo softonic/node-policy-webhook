@@ -1,0 +1,3 @@
+ssl/*.csr
+ssl/*.key
+ssl/*.pem
