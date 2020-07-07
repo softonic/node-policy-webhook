@@ -2,6 +2,8 @@ BIN := node-policy-webhook
 PKG := github.com/softonic/node-policy-webhook
 VERSION := 0.0.0-dev
 ARCH := amd64
+APP := node-policy-webhook
+NAMESPACE := default
 
 IMAGE := $(BIN)
 
@@ -23,6 +25,10 @@ build:
 image: build
 	docker build -t $(IMAGE):$(VERSION) -f Dockerfile .
 	docker tag $(IMAGE):$(VERSION) $(IMAGE):latest
+
+.PHONY: cert
+cert:
+	bash -x ssl/ssl.sh $(APP) $(NAMESPACE)
 
 .PHONY: clean
 clean:
