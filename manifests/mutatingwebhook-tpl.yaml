@@ -23,3 +23,6 @@ webhooks:
     timeoutSeconds: 5
     reinvocationPolicy: Never
     failurePolicy: Fail
+    namespaceSelector:
+      matchLabels:
+        mutateme: enabled

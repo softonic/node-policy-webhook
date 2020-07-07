@@ -40,11 +40,13 @@ clean:
 
 .PHONY: undeploy
 undeploy:
-	kubectl delete -f manifests/deployment-opa.yml || true
+	kubectl delete -f manifests/ || true
 
 .PHONY: deploy
 deploy:
-	kubectl create -f manifests/deployment-opa.yml
+	kubectl create -f manifests/deployment.yaml
+	kubectl create -f manifests/service.yaml
+	kubectl create -f manifests/mutatingwebhook.yaml
 
 .PHONY: up
 up: image undeploy deploy

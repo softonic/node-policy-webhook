@@ -20,11 +20,21 @@ spec:
         - name: node-policy-webhook
           image: santinoncs/node-policy-webhook:latest
           imagePullPolicy: Always
+          volumeMounts:
+          - name: webhook-certs
+            mountPath: /etc/webhook/certs
+            readOnly: true
           resources:
             limits:
               cpu: 500m
               memory: 128Mi
             requests:
-              cpu: 250m
-              memory: 64Mi
-
+              cpu: 100m
+              memory: 32Mi
+      volumes:
+      - name: webhook-certs
+        secret:
+          secretName: node-policy-webhook
+      - name: webhook-config
+        configMap:
+          name: sidecar-injector-webhook-configmap
