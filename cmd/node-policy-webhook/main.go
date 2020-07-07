@@ -29,7 +29,10 @@ func main() {
 		},
 	}
 	rootCmd.Flags().BoolVarP(&params.version, "version", "v", false, "print version and exit")
-	rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
 
 func run(params *params) {
