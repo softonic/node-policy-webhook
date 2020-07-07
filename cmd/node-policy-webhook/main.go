@@ -13,7 +13,7 @@ import (
 
 	_ "github.com/golang/glog"
 	"k8s.io/api/admission/v1beta1"
-	//corev1 "k8s.io/api/core/v1"
+	// corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -58,12 +58,6 @@ func run(params *params) {
 
 	}
 
-	//err := http.ListenAndServe(":8080", nil)
-
-	glog.Errorf("Failed to listen and serve webhook server: %v", err)
-
-	fmt.Println(err)
-
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -84,25 +78,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 					Message: err.Error(),
 				},
 			}
-			fmt.Println(admissionResponse)
 
 		} else {
-
 			admissionResponse = &v1beta1.AdmissionResponse{
 				Result: &metav1.Status{
-					Message: "hola",
+					Status: "Success",
 				},
+				Allowed: true,
+				UID:     ar.Request.UID,
 			}
 		}
-
 
 		admissionReview := v1beta1.AdmissionReview{}
-		if admissionResponse != nil {
-			admissionReview.Response = admissionResponse
-			if ar.Request != nil {
-				admissionReview.Response.UID = ar.Request.UID
-			}
-		}
+		admissionReview.Response = admissionResponse
+
 		resp, err := json.Marshal(admissionReview)
 		glog.Infof("Ready to write reponse ...")
 		if _, err := w.Write(resp); err != nil {
