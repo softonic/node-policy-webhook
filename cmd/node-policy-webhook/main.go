@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/golang/glog"
+	// "github.com/softonic/node-policy-webhook/api/v1alpha1"
 	"github.com/softonic/node-policy-webhook/pkg/version"
 	"github.com/spf13/cobra"
+	"log"
 	"net/http"
 	"os"
 	"path"
 
-	_ "github.com/golang/glog"
 	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -60,14 +61,18 @@ func run(params *params) {
 		handler(w, r)
 	})
 	if err := http.ListenAndServeTLS(":443", "/etc/webhook/certs/cert.pem", "/etc/webhook/certs/key.pem", nil); err != nil {
+		log.Println(err)
 		glog.Errorf("Failed to listen and serve webhook server: %v", err)
 
 	}
-
+	glog.Info("Server started")
 }
 
-func createPatch(pod *corev1.Pod) ([]byte, error) {
+func createPatch(pod *corev1.Pod, profile string) ([]byte, error) {
 	var patch []patchOperation
+
+	// nodePolicy := &v1alpha1.NodePolicyProfile{}
+	// nodeSelector := make(map[string]string)
 
 	patch = append(patch, patchOperation{
 		Op:   "add",
@@ -86,9 +91,8 @@ func createPatch(pod *corev1.Pod) ([]byte, error) {
 	return json.Marshal(patch)
 }
 
-func mutationRequired(metadata *metav1.ObjectMeta) bool {
+func mutationRequired(metadata *metav1.ObjectMeta) (bool, string) {
 
-	//var required bool
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
 		annotations = map[string]string{}
@@ -96,11 +100,15 @@ func mutationRequired(metadata *metav1.ObjectMeta) bool {
 
 	//nodeselector := annotations["softonic.io/profile"]
 
-	return true
+	if val, ok := annotations["softonic.io/profile"]; ok {
+		return true, val
+	}
+
+	return false, ""
 
 }
 
-func mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
+func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 
 	req := ar.Request
 	var pod corev1.Pod
@@ -111,23 +119,27 @@ func mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 			Result: &metav1.Status{
 				Message: err.Error(),
 			},
-		}
+		}, err
 	}
 
-	if !mutationRequired(&pod.ObjectMeta) {
+	required, profile := mutationRequired(&pod.ObjectMeta)
+	if !required {
+
 		glog.Infof("Skipping mutation for %s/%s due to policy check", pod.Namespace, pod.Name)
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
-		}
+		}, nil
 	}
 
-	patchBytes, err := createPatch(&pod)
+
+
+	patchBytes, err := createPatch(&pod,profile)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
 			},
-		}
+		}, err
 	}
 
 	pT := v1beta1.PatchTypeJSONPatch
@@ -145,7 +157,7 @@ func mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 		PatchType: &pT,
 		Allowed:   true,
 		UID:       ar.Request.UID,
-	}
+	}, nil
 
 }
 
@@ -159,6 +171,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&ar)
 		if err != nil {
 			glog.Errorf("Can decode body: %v", err)
+			log.Println(err)
 			admissionResponse = &v1beta1.AdmissionResponse{
 				Result: &metav1.Status{
 					Message: err.Error(),
@@ -168,7 +181,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		} else {
 
-			admissionResponse = mutate(&ar)
+			admissionResponse, err = mutate(&ar)
+			if err != nil {
+				log.Println(err)
+				glog.Errorf("Can't write response: %v", err)
+			} else {
+				glog.Infof("Success mutating")
+				log.Println("funciono el mutating")
+			}
 
 		}
 
