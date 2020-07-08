@@ -8,14 +8,16 @@ import (
 	"github.com/softonic/node-policy-webhook/api/v1alpha1"
 	"github.com/softonic/node-policy-webhook/pkg/version"
 	"github.com/spf13/cobra"
+	"k8s.io/api/admission/v1beta1"
+	admissionv1beta "k8s.io/api/admission/v1beta1"
+	v1 "k8s.io/api/authentication/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"log"
 	"net/http"
 	"os"
 	"path"
-
-	"k8s.io/api/admission/v1beta1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type params struct {

@@ -14,7 +14,7 @@ spec:
     listKind: NodePolicyProfileList
     plural: nodepolicyprofiles
     singular: nodepolicyprofile
-  scope: Cluster
+  scope: Global
   validation:
     openAPIV3Schema:
       description: NodePolicyProfile is the Schema for the nodepolicyprofiles API
