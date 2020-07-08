@@ -26,11 +26,9 @@ import (
 
 // NodePolicyProfileSpec defines the desired state of NodePolicyProfile
 type NodePolicyProfileSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of NodePolicyProfile. Edit NodePolicyProfile_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Tolerations  []corev1.Toleration     `json:"tolerations,omitempty"`
+	NodeAffinity corev1.NodeAffinity     `json:"nodeAffinity,omitempty"`
+	NodeSelector corev1.NodeSelector     `json:"nodeSelector,omitempty"`
 }
 
 // NodePolicyProfileStatus defines the observed state of NodePolicyProfile
@@ -48,9 +46,6 @@ type NodePolicyProfile struct {
 
 	Spec         NodePolicyProfileSpec   `json:"spec,omitempty"`
 	Status       NodePolicyProfileStatus `json:"status,omitempty"`
-	Tolerations  []corev1.Toleration     `json:"tolerations,omitempty"`
-	NodeAffinity corev1.NodeAffinity     `json:"nodeAffinity,omitempty"`
-	NodeSelector corev1.NodeSelector     `json:"nodeSelector,omitempty"`
 }
 
 // +object:root=true

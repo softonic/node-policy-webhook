@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 // Package v1 contains API Schema definitions for the noodepolicies v1 API group
-// +kubebuilder:object:generate=true
+// +object:generate=true
 // +groupName=noodepolicies.softonic.io
 package v1alpha1
 
