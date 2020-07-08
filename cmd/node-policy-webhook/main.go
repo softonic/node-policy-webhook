@@ -79,8 +79,8 @@ func createPatch(pod *corev1.Pod, profile string) ([]byte, error) {
 	}
 
 	patch = append(patch, patchOperation{
-		Op:   "add",
-		Path: "/spec/nodeSelector",
+		Op:    "add",
+		Path:  "/spec/nodeSelector",
 		Value: nodeSelector,
 	})
 
@@ -133,9 +133,7 @@ func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 		}, nil
 	}
 
-
-
-	patchBytes, err := createPatch(&pod,profile)
+	patchBytes, err := createPatch(&pod, profile)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{

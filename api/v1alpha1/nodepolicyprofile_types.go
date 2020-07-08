@@ -17,8 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -26,9 +26,9 @@ import (
 
 // NodePolicyProfileSpec defines the desired state of NodePolicyProfile
 type NodePolicyProfileSpec struct {
-	Tolerations  []corev1.Toleration     `json:"tolerations,omitempty"`
-	NodeAffinity corev1.NodeAffinity     `json:"nodeAffinity,omitempty"`
-	NodeSelector map[string]string       `json:"nodeSelector,omitempty"`
+	Tolerations  []corev1.Toleration `json:"tolerations,omitempty"`
+	NodeAffinity corev1.NodeAffinity `json:"nodeAffinity,omitempty"`
+	NodeSelector map[string]string   `json:"nodeSelector,omitempty"`
 }
 
 // NodePolicyProfileStatus defines the observed state of NodePolicyProfile
@@ -37,19 +37,19 @@ type NodePolicyProfileStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
-// +object:root=true
-// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Global
 
 // NodePolicyProfile is the Schema for the nodepolicyprofiles API
 type NodePolicyProfile struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec         NodePolicyProfileSpec   `json:"spec,omitempty"`
-	Status       NodePolicyProfileStatus `json:"status,omitempty"`
+	Spec   NodePolicyProfileSpec   `json:"spec,omitempty"`
+	Status NodePolicyProfileStatus `json:"status,omitempty"`
 }
 
-// +object:root=true
+// +kubebuilder:object:root=true
 
 // NodePolicyProfileList contains a list of NodePolicyProfile
 type NodePolicyProfileList struct {
