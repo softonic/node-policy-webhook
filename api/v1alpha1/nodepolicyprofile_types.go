@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -45,8 +46,11 @@ type NodePolicyProfile struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   NodePolicyProfileSpec   `json:"spec,omitempty"`
-	Status NodePolicyProfileStatus `json:"status,omitempty"`
+	Spec         NodePolicyProfileSpec   `json:"spec,omitempty"`
+	Status       NodePolicyProfileStatus `json:"status,omitempty"`
+	Tolerations  []corev1.Toleration     `json:"tolerations,omitempty"`
+	NodeAffinity corev1.NodeAffinity     `json:"nodeAffinity,omitempty"`
+	NodeSelector corev1.NodeSelector     `json:"nodeSelector,omitempty"`
 }
 
 // +object:root=true
