@@ -1,0 +1,12 @@
+apiVersion: noodepolicies.softonic.io/v1alpha1
+kind: NodePolicyProfile
+metadata:
+  name: test
+spec:
+  nodeSelector:
+    type: "stateless"
+  tolerations:
+  - key: "type"
+    operator: "Equal"
+    value: "stateless"
+    effect: "NoSchedule"
