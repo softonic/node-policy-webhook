@@ -45,6 +45,7 @@ undeploy:
 
 .PHONY: deploy
 deploy:
+	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl create -f manifests/deployment.yaml
 	kubectl create -f manifests/service.yaml
 	kubectl create -f manifests/mutatingwebhook.yaml
