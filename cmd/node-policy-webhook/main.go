@@ -13,12 +13,18 @@ import (
 
 	_ "github.com/golang/glog"
 	"k8s.io/api/admission/v1beta1"
-	// corev1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type params struct {
 	version bool
+}
+
+type patchOperation struct {
+	Op    string      `json:"op"`
+	Path  string      `json:"path"`
+	Value interface{} `json:"value,omitempty"`
 }
 
 func main() {
@@ -60,13 +66,93 @@ func run(params *params) {
 
 }
 
+func createPatch(pod *corev1.Pod) ([]byte, error) {
+	var patch []patchOperation
+
+	patch = append(patch, patchOperation{
+		Op:   "add",
+		Path: "/spec/nodeSelector",
+		Value: map[string]string{
+			"type": "stateless",
+		},
+	})
+
+	// patch = append(patch, patchOperation{
+	// 	Op:    "replace",
+	// 	Path:  "/spec/containers/0/image",
+	// 	Value: "debian",
+	// })
+
+	return json.Marshal(patch)
+}
+
+func mutationRequired(metadata *metav1.ObjectMeta) bool {
+
+	//var required bool
+	annotations := metadata.GetAnnotations()
+	if annotations == nil {
+		annotations = map[string]string{}
+	}
+
+	//nodeselector := annotations["softonic.io/profile"]
+
+	return true
+
+}
+
+func mutate(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
+
+	req := ar.Request
+	var pod corev1.Pod
+	err := json.Unmarshal(req.Object.Raw, &pod)
+	if err != nil {
+		glog.Errorf("Could not unmarshal raw object: %v", err)
+		return &v1beta1.AdmissionResponse{
+			Result: &metav1.Status{
+				Message: err.Error(),
+			},
+		}
+	}
+
+	if !mutationRequired(&pod.ObjectMeta) {
+		glog.Infof("Skipping mutation for %s/%s due to policy check", pod.Namespace, pod.Name)
+		return &v1beta1.AdmissionResponse{
+			Allowed: true,
+		}
+	}
+
+	patchBytes, err := createPatch(&pod)
+	if err != nil {
+		return &v1beta1.AdmissionResponse{
+			Result: &metav1.Status{
+				Message: err.Error(),
+			},
+		}
+	}
+
+	pT := v1beta1.PatchTypeJSONPatch
+
+	return &v1beta1.AdmissionResponse{
+		Result: &metav1.Status{
+			Status: "Success",
+		},
+		Patch: patchBytes,
+		// PatchType: func() *v1beta1.PatchType {
+		// 	pt := v1beta1.PatchTypeJSONPatch
+		// 	return &pt
+		// }(),
+
+		PatchType: &pT,
+		Allowed:   true,
+		UID:       ar.Request.UID,
+	}
+
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 
 	var admissionResponse *v1beta1.AdmissionResponse
 	ar := v1beta1.AdmissionReview{}
-	//req := ar.Request
-
-	//var pod corev1.Pod
 
 	if r.URL.Path == "/mutate" {
 
@@ -76,24 +162,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			admissionResponse = &v1beta1.AdmissionResponse{
 				Result: &metav1.Status{
 					Message: err.Error(),
+					Status:  "Fail",
 				},
 			}
 
 		} else {
-			admissionResponse = &v1beta1.AdmissionResponse{
-				Result: &metav1.Status{
-					Status: "Success",
-				},
-				Allowed: true,
-				UID:     ar.Request.UID,
-			}
+
+			admissionResponse = mutate(&ar)
+
 		}
 
 		admissionReview := v1beta1.AdmissionReview{}
 		admissionReview.Response = admissionResponse
 
 		resp, err := json.Marshal(admissionReview)
-		//glog.Infof("Ready to write reponse ...")
 		if _, err := w.Write(resp); err != nil {
 			glog.Errorf("Can't write response: %v", err)
 			http.Error(w, fmt.Sprintf("could not write response: %v", err), http.StatusInternalServerError)
