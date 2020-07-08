@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/golang/glog"
-	// "github.com/softonic/node-policy-webhook/api/v1alpha1"
+	"github.com/softonic/node-policy-webhook/api/v1alpha1"
 	"github.com/softonic/node-policy-webhook/pkg/version"
 	"github.com/spf13/cobra"
 	"log"
@@ -71,15 +71,17 @@ func run(params *params) {
 func createPatch(pod *corev1.Pod, profile string) ([]byte, error) {
 	var patch []patchOperation
 
-	// nodePolicy := &v1alpha1.NodePolicyProfile{}
-	// nodeSelector := make(map[string]string)
+	nodePolicyProfile := &v1alpha1.NodePolicyProfile{}
+	nodeSelector := make(map[string]string)
+
+	for key, value := range nodePolicyProfile.Spec.NodeSelector {
+		nodeSelector[key] = value
+	}
 
 	patch = append(patch, patchOperation{
 		Op:   "add",
 		Path: "/spec/nodeSelector",
-		Value: map[string]string{
-			"type": "stateless",
-		},
+		Value: nodeSelector,
 	})
 
 	// patch = append(patch, patchOperation{

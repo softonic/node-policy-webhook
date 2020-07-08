@@ -28,7 +28,7 @@ import (
 type NodePolicyProfileSpec struct {
 	Tolerations  []corev1.Toleration     `json:"tolerations,omitempty"`
 	NodeAffinity corev1.NodeAffinity     `json:"nodeAffinity,omitempty"`
-	NodeSelector corev1.NodeSelector     `json:"nodeSelector,omitempty"`
+	NodeSelector map[string]string       `json:"nodeSelector,omitempty"`
 }
 
 // NodePolicyProfileStatus defines the observed state of NodePolicyProfile
@@ -38,6 +38,7 @@ type NodePolicyProfileStatus struct {
 }
 
 // +object:root=true
+// +kubebuilder:resource:scope=Cluster
 
 // NodePolicyProfile is the Schema for the nodepolicyprofiles API
 type NodePolicyProfile struct {
