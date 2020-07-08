@@ -32,7 +32,7 @@ cert:
 	ssl/ssl.sh $(APP) $(NAMESPACE)
 
 .PHONY: apply-patch
-apply-patch:
+apply-patch: cert
 	ssl/patch_ca_bundle.sh
 
 .PHONY: clean
@@ -44,11 +44,11 @@ undeploy:
 	kubectl delete -f manifests/ || true
 
 .PHONY: deploy
-deploy:
+deploy: apply-patch
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
-	kubectl create -f manifests/deployment.yaml
-	kubectl create -f manifests/service.yaml
-	kubectl create -f manifests/mutatingwebhook.yaml
+	kubectl apply -f manifests/deployment.yaml
+	kubectl apply -f manifests/service.yaml
+	kubectl apply -f manifests/mutatingwebhook.yaml
 
 .PHONY: up
 up: image undeploy deploy

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -11,6 +12,8 @@ import (
 	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 	"log"
 	"net/http"
 	"os"
@@ -70,13 +73,31 @@ func run(params *params) {
 func createPatch(pod *corev1.Pod, profile string) ([]byte, error) {
 	var patch []patchOperation
 
-	nodePolicyProfile := &v1alpha1.NodePolicyProfile{}
-	nodeSelector := make(map[string]string)
-
-	for key, value := range nodePolicyProfile.Spec.NodeSelector {
-		nodeSelector[key] = value
+	cfg, err := rest.InClusterConfig()
+	if err != nil {
+		panic(err.Error())
+	}
+	client, err := dynamic.NewForConfig(cfg)
+	if err != nil {
+		panic(err.Error())
 	}
 
+	resourceScheme := v1alpha1.SchemeBuilder.GroupVersion.WithResource("nodepolicyprofile")
+
+	resp, _ := client.Resource(resourceScheme).Get(context.TODO(), "test", metav1.GetOptions{})
+
+	log.Println(resp)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	nodeSelector := make(map[string]string)
+
+	/*for key, value := range nodePolicyProfile.Spec.NodeSelector {
+		nodeSelector[key] = value
+	}
+	*/
 	patch = append(patch, patchOperation{
 		Op:    "add",
 		Path:  "/spec/nodeSelector",

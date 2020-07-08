@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 set -uo errexit
 
 export APP="${1}"

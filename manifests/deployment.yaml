@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: node-policy-webhook
-          image: santinoncs/node-policy-webhook:latest
-          imagePullPolicy: Always
+          image: node-policy-webhook:0.0.0-dev
+          imagePullPolicy: Never
           volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

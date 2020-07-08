@@ -38,7 +38,7 @@ type NodePolicyProfileStatus struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:scope=Global
+// +kubebuilder:resource:scope=Cluster
 
 // NodePolicyProfile is the Schema for the nodepolicyprofiles API
 type NodePolicyProfile struct {
