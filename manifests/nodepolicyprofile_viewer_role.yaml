@@ -1,0 +1,20 @@
+# permissions for end users to view nodepolicyprofiles.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nodepolicyprofile-viewer-role
+rules:
+- apiGroups:
+  - noodepolicies.softonic.io
+  resources:
+  - nodepolicyprofiles
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - noodepolicies.softonic.io
+  resources:
+  - nodepolicyprofiles/status
+  verbs:
+  - get

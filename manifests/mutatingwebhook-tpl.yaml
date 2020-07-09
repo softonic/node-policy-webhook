@@ -7,6 +7,11 @@ metadata:
     app: node-policy-webhook
 webhooks:
   - name: node-policy-webhook.default.svc.cluster.local
+    objectSelector:
+      matchExpressions:
+        - key: app
+          operator: NotIn
+          values: ["node-policy-webhook"]
     clientConfig:
       caBundle: ${CA_BUNDLE}
       service:
@@ -23,6 +28,3 @@ webhooks:
     timeoutSeconds: 5
     reinvocationPolicy: Never
     failurePolicy: Fail
-    namespaceSelector:
-      matchLabels:
-        mutateme: enabled
