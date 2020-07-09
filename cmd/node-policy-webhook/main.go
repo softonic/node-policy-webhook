@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/golang/glog"
+	_ "github.com/golang/glog"
 	"github.com/softonic/node-policy-webhook/api/v1alpha1"
 	"github.com/softonic/node-policy-webhook/pkg/version"
 	"github.com/spf13/cobra"
@@ -59,7 +59,7 @@ func run(params *params) {
 
 	_, err := tls.LoadX509KeyPair("/etc/webhook/certs/cert.pem", "/etc/webhook/certs/key.pem")
 	if err != nil {
-		glog.Errorf("Failed to load key pair: %v", err)
+		klog.Errorf("Failed to load key pair: %v", err)
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -67,10 +67,10 @@ func run(params *params) {
 	})
 	if err := http.ListenAndServeTLS(":443", "/etc/webhook/certs/cert.pem", "/etc/webhook/certs/key.pem", nil); err != nil {
 		log.Println(err)
-		glog.Errorf("Failed to listen and serve webhook server: %v", err)
+		klog.Errorf("Failed to listen and serve webhook server: %v", err)
 
 	}
-	glog.Info("Server started")
+	
 }
 
 func createPatch(pod *corev1.Pod, profileName string) ([]byte, error) {
@@ -137,10 +137,8 @@ func getProfile(metadata *metav1.ObjectMeta) (string, error) {
 		annotations = map[string]string{}
 	}
 
-	//nodeselector := annotations["softonic.io/profile"]
-
-	if val, ok := annotations["softonic.io/profile"]; ok {
-		return val, nil
+	if profileName, ok := annotations["softonic.io/profile"]; ok {
+		return profileName, nil
 	}
 
 	return "", errors.New("Annotation not found")
@@ -152,7 +150,7 @@ func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 	var pod corev1.Pod
 	err := json.Unmarshal(req.Object.Raw, &pod)
 	if err != nil {
-		glog.Errorf("Could not unmarshal raw object: %v", err)
+		klog.Errorf("Could not unmarshal raw object: %v", err)
 		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
@@ -160,9 +158,12 @@ func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 		}, err
 	}
 
+	klog.Infof("AdmissionReview for Kind=%v, Namespace=%v Name=%v (%v) UID=%v patchOperation=%v UserInfo=%v",
+		req.Kind, req.Namespace, req.Name, pod.Name, req.UID, req.Operation, req.UserInfo)
+
 	profile, err := getProfile(&pod.ObjectMeta)
 	if err !=nil {
-		glog.Infof("Skipping mutation for %s/%s due to policy check", pod.Namespace, pod.Name)
+		klog.Infof("Skipping mutation for %s/%s due to policy check", pod.Namespace, pod.Name)
 
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
@@ -206,7 +207,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		err := json.NewDecoder(r.Body).Decode(&ar)
 		if err != nil {
-			glog.Errorf("Can decode body: %v", err)
+			klog.Errorf("Can decode body: %v", err)
 			log.Println(err)
 			admissionResponse = &v1beta1.AdmissionResponse{
 				Result: &metav1.Status{
@@ -220,10 +221,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			admissionResponse, err = mutate(&ar)
 			if err != nil {
 				log.Println(err)
-				glog.Errorf("Can't write response: %v", err)
+				klog.Errorf("Can't write response: %v", err)
 			} else {
-				glog.Infof("Success mutating")
-				log.Println("funciono el mutating")
+				klog.Infof("We have a response: %v", admissionResponse)
 			}
 
 		}
@@ -233,7 +233,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		resp, err := json.Marshal(admissionReview)
 		if _, err := w.Write(resp); err != nil {
-			glog.Errorf("Can't write response: %v", err)
+			klog.Errorf("Can't write response: %v", err)
 			http.Error(w, fmt.Sprintf("could not write response: %v", err), http.StatusInternalServerError)
 		}
 
