@@ -5,11 +5,17 @@ VERSION := 0.0.0-dev
 ARCH := amd64
 APP := node-policy-webhook
 NAMESPACE := default
-KO_DOCKER_REPO="registry.softonic.io/node-policy-webhook"
+KO_DOCKER_REPO = registry.softonic.io/node-policy-webhook
 
 IMAGE := $(BIN)
 
 BUILD_IMAGE ?= golang:1.14-buster
+
+
+deploy-prod: IMAGE_GEN = "github.com/softonic/node-policy-webhook/cmd/node-policy-webhook"
+
+deploy-dev: IMAGE_GEN = $(APP):$(VERSION)
+
 
 .PHONY: all
 all: image
@@ -48,14 +54,27 @@ clean:
 undeploy:
 	kubectl delete -f manifests/ || true
 
-.PHONY: deploy
-deploy: apply-patch
+.PHONY: deploy-dev
+deploy-dev: apply-patch
+	cat manifests/deployment-tpl.yaml| envsubst > manifests/deployment.yaml
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl apply -f manifests/deployment.yaml
 	kubectl apply -f manifests/service.yaml
 	kubectl apply -f manifests/mutatingwebhook.yaml
 	kubectl apply -f manifests/nodepolicyprofile_viewer_role.yaml
 	kubectl apply -f manifests/role_binding.yaml
+
+.PHONY: deploy-prod
+deploy-prod: apply-patch
+	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
+	ko resolve -f manifests/deployment.yaml	> manifests/deployment-ko.yaml
+	kubectl apply -f manifests/deployment-ko.yaml
+	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
+	kubectl apply -f manifests/service.yaml
+	kubectl apply -f manifests/mutatingwebhook.yaml
+	kubectl apply -f manifests/nodepolicyprofile_viewer_role.yaml
+	kubectl apply -f manifests/role_binding.yaml
+
 
 .PHONY: up
 up: image undeploy deploy
