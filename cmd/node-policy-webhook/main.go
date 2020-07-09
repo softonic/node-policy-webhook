@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/softonic/node-policy-webhook/api/v1alpha1"
@@ -12,8 +13,10 @@ import (
 	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
+	"k8s.io/klog"
 	"log"
 	"net/http"
 	"os"
@@ -70,7 +73,7 @@ func run(params *params) {
 	glog.Info("Server started")
 }
 
-func createPatch(pod *corev1.Pod, profile string) ([]byte, error) {
+func createPatch(pod *corev1.Pod, profileName string) ([]byte, error) {
 	var patch []patchOperation
 
 	cfg, err := rest.InClusterConfig()
@@ -82,28 +85,35 @@ func createPatch(pod *corev1.Pod, profile string) ([]byte, error) {
 		panic(err.Error())
 	}
 
-	resourceScheme := v1alpha1.SchemeBuilder.GroupVersion.WithResource("nodepolicyprofile")
+	resourceScheme := v1alpha1.SchemeBuilder.GroupVersion.WithResource("nodepolicyprofiles")
 
-	resp, _ := client.Resource(resourceScheme).Get(context.TODO(), "test", metav1.GetOptions{})
+	resp, err := client.Resource(resourceScheme).Get(context.TODO(), profileName, metav1.GetOptions{})
+	if err != nil {
+		klog.Fatalf("Error getting NodePolicyProfile %s %v (Resource Scheme %v)", profileName, err, resourceScheme)
+	}
+	klog.Infof("Got NodePolicyProfile %s: %v", profileName, resp)
 
-	log.Println(resp)
-
+	nodePolicyProfile := &v1alpha1.NodePolicyProfile{}
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(resp.UnstructuredContent(), nodePolicyProfile)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	nodeSelector := make(map[string]string)
 
-	/*for key, value := range nodePolicyProfile.Spec.NodeSelector {
+	for key, value := range nodePolicyProfile.Spec.NodeSelector {
 		nodeSelector[key] = value
 	}
-	*/
+
 	patch = append(patch, patchOperation{
 		Op:    "add",
 		Path:  "/spec/nodeSelector",
 		Value: nodeSelector,
 	})
 
+//	tolerations := []corev1.Toleration{}
+
+//	append(tolerations, pod.Spec.Tolerations, nodePolicyProfile.Spec.Tolerations)
 	// patch = append(patch, patchOperation{
 	// 	Op:    "replace",
 	// 	Path:  "/spec/containers/0/image",
@@ -113,7 +123,7 @@ func createPatch(pod *corev1.Pod, profile string) ([]byte, error) {
 	return json.Marshal(patch)
 }
 
-func mutationRequired(metadata *metav1.ObjectMeta) (bool, string) {
+func getProfile(metadata *metav1.ObjectMeta) (string, error) {
 
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
@@ -123,11 +133,10 @@ func mutationRequired(metadata *metav1.ObjectMeta) (bool, string) {
 	//nodeselector := annotations["softonic.io/profile"]
 
 	if val, ok := annotations["softonic.io/profile"]; ok {
-		return true, val
+		return val, nil
 	}
 
-	return false, ""
-
+	return "", errors.New("Annotation not found")
 }
 
 func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
@@ -144,10 +153,10 @@ func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 		}, err
 	}
 
-	required, profile := mutationRequired(&pod.ObjectMeta)
-	if !required {
-
+	profile, err := getProfile(&pod.ObjectMeta)
+	if err !=nil {
 		glog.Infof("Skipping mutation for %s/%s due to policy check", pod.Namespace, pod.Name)
+
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}, nil
