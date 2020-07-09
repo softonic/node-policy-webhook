@@ -5,6 +5,7 @@ VERSION := 0.0.0-dev
 ARCH := amd64
 APP := node-policy-webhook
 NAMESPACE := default
+KO_DOCKER_REPO="registry.softonic.io/node-policy-webhook"
 
 IMAGE := $(BIN)
 
@@ -26,6 +27,10 @@ build: generate
 image: build
 	docker build -t $(IMAGE):$(VERSION) -f Dockerfile .
 	docker tag $(IMAGE):$(VERSION) $(IMAGE):latest
+
+.PHONY: dev
+dev: image
+	kind load docker-image $(IMAGE):$(VERSION)
 
 .PHONY: cert
 cert:
@@ -62,6 +67,10 @@ push:
 .PHONY: push-latest
 push-latest:
 	docker push $(IMAGE):latest
+
+.PHONY: ko-publish
+ko-publish:
+	ko publish cmd/$(APP)/$(APP).go
 
 .PHONY: version
 version:
