@@ -49,6 +49,8 @@ deploy: apply-patch
 	kubectl apply -f manifests/deployment.yaml
 	kubectl apply -f manifests/service.yaml
 	kubectl apply -f manifests/mutatingwebhook.yaml
+	kubectl apply -f manifests/nodepolicyprofile_viewer_role.yaml
+	kubectl apply -f manifests/role_binding.yaml
 
 .PHONY: up
 up: image undeploy deploy
