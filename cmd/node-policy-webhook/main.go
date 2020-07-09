@@ -96,7 +96,8 @@ func createPatch(pod *corev1.Pod, profileName string) ([]byte, error) {
 	nodePolicyProfile := &v1alpha1.NodePolicyProfile{}
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(resp.UnstructuredContent(), nodePolicyProfile)
 	if err != nil {
-		panic(err.Error())
+		//panic(err.Error())
+		return nil, errors.New("Policy not found")
 	}
 
 	nodeSelector := make(map[string]string)
@@ -179,6 +180,10 @@ func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 		}, err
 	}
 
+	AuditAnnotations := map[string]string{
+		"softonic.io/node-policy-webhook": "enabled",
+	}
+
 	pT := v1beta1.PatchTypeJSONPatch
 
 	return &v1beta1.AdmissionResponse{
@@ -186,14 +191,10 @@ func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 			Status: "Success",
 		},
 		Patch: patchBytes,
-		// PatchType: func() *v1beta1.PatchType {
-		// 	pt := v1beta1.PatchTypeJSONPatch
-		// 	return &pt
-		// }(),
-
 		PatchType: &pT,
 		Allowed:   true,
 		UID:       ar.Request.UID,
+		AuditAnnotations: AuditAnnotations,
 	}, nil
 
 }
@@ -223,7 +224,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				log.Println(err)
 				klog.Errorf("Can't write response: %v", err)
 			} else {
-				klog.Infof("We have a response: %v", admissionResponse)
+				klog.Infof("We have a response with status: %v", admissionResponse.Result.Status)
 			}
 
 		}
