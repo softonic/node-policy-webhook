@@ -111,14 +111,21 @@ func createPatch(pod *corev1.Pod, profileName string) ([]byte, error) {
 		Value: nodeSelector,
 	})
 
-//	tolerations := []corev1.Toleration{}
+	tolerations := []corev1.Toleration{}
 
-//	append(tolerations, pod.Spec.Tolerations, nodePolicyProfile.Spec.Tolerations)
-	// patch = append(patch, patchOperation{
-	// 	Op:    "replace",
-	// 	Path:  "/spec/containers/0/image",
-	// 	Value: "debian",
-	// })
+
+	tolerations = append(tolerations, pod.Spec.Tolerations...)
+
+	tolerations = append(tolerations, nodePolicyProfile.Spec.Tolerations...)
+
+
+	fmt.Println(tolerations)
+
+	patch = append(patch, patchOperation{
+		Op:    "replace",
+		Path:  "/spec/tolerations",
+		Value: tolerations,
+	})
 
 	return json.Marshal(patch)
 }
