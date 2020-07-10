@@ -12,9 +12,9 @@ IMAGE := $(BIN)
 BUILD_IMAGE ?= golang:1.14-buster
 
 
-deploy-prod: IMAGE_GEN = "github.com/softonic/node-policy-webhook/cmd/node-policy-webhook"
+deploy-prod: export IMAGE_GEN = "github.com/softonic/node-policy-webhook/cmd/node-policy-webhook"
 
-deploy-dev: IMAGE_GEN = $(APP):$(VERSION)
+deploy-dev:  export IMAGE_GEN = $(APP):$(VERSION)
 
 
 .PHONY: all
@@ -56,7 +56,7 @@ undeploy:
 
 .PHONY: deploy-dev
 deploy-dev: apply-patch
-	cat manifests/deployment-tpl.yaml| envsubst > manifests/deployment.yaml
+	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl apply -f manifests/deployment.yaml
 	kubectl apply -f manifests/service.yaml
