@@ -70,7 +70,7 @@ func run(params *params) {
 		klog.Errorf("Failed to listen and serve webhook server: %v", err)
 
 	}
-	
+
 }
 
 func createPatch(pod *corev1.Pod, profileName string) ([]byte, error) {
@@ -96,13 +96,13 @@ func createPatch(pod *corev1.Pod, profileName string) ([]byte, error) {
 	nodePolicyProfile := &v1alpha1.NodePolicyProfile{}
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(resp.UnstructuredContent(), nodePolicyProfile)
 	if err != nil {
-		//panic(err.Error())
 		return nil, errors.New("Policy not found")
 	}
 
 	nodeSelector := make(map[string]string)
 
 	for key, value := range nodePolicyProfile.Spec.NodeSelector {
+		klog.Infof("Assigning nodeSelector from policy %v to the map", nodePolicyProfile.Name)
 		nodeSelector[key] = value
 	}
 
@@ -114,13 +114,9 @@ func createPatch(pod *corev1.Pod, profileName string) ([]byte, error) {
 
 	tolerations := []corev1.Toleration{}
 
-
 	tolerations = append(tolerations, pod.Spec.Tolerations...)
 
 	tolerations = append(tolerations, nodePolicyProfile.Spec.Tolerations...)
-
-
-	fmt.Println(tolerations)
 
 	patch = append(patch, patchOperation{
 		Op:    "replace",
@@ -139,6 +135,7 @@ func getProfile(metadata *metav1.ObjectMeta) (string, error) {
 	}
 
 	if profileName, ok := annotations["softonic.io/profile"]; ok {
+		klog.Infof("Successfully found annotation softonic.io/profile. With profile: %v", profileName)
 		return profileName, nil
 	}
 
@@ -163,7 +160,7 @@ func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 		req.Kind, req.Namespace, req.Name, pod.Name, req.UID, req.Operation, req.UserInfo)
 
 	profile, err := getProfile(&pod.ObjectMeta)
-	if err !=nil {
+	if err != nil {
 		klog.Infof("Skipping mutation for %s/%s due to policy check", pod.Namespace, pod.Name)
 
 		return &v1beta1.AdmissionResponse{
@@ -184,16 +181,18 @@ func mutate(ar *v1beta1.AdmissionReview) (*v1beta1.AdmissionResponse, error) {
 		"softonic.io/node-policy-webhook": "enabled",
 	}
 
+	klog.Infof("All the patches are ready to be replied in the response")
+
 	pT := v1beta1.PatchTypeJSONPatch
 
 	return &v1beta1.AdmissionResponse{
 		Result: &metav1.Status{
 			Status: "Success",
 		},
-		Patch: patchBytes,
-		PatchType: &pT,
-		Allowed:   true,
-		UID:       ar.Request.UID,
+		Patch:            patchBytes,
+		PatchType:        &pT,
+		Allowed:          true,
+		UID:              ar.Request.UID,
 		AuditAnnotations: AuditAnnotations,
 	}, nil
 
@@ -204,12 +203,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	var admissionResponse *v1beta1.AdmissionResponse
 	ar := v1beta1.AdmissionReview{}
 
+	contentType := r.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		klog.Errorf("Content-Type=%s, expect application/json", contentType)
+		http.Error(w, "invalid Content-Type, expect `application/json`", http.StatusUnsupportedMediaType)
+		return
+	}
+
 	if r.URL.Path == "/mutate" {
 
 		err := json.NewDecoder(r.Body).Decode(&ar)
 		if err != nil {
-			klog.Errorf("Can decode body: %v", err)
-			log.Println(err)
+			klog.Errorf("Can't decode body: %v", err)
 			admissionResponse = &v1beta1.AdmissionResponse{
 				Result: &metav1.Status{
 					Message: err.Error(),

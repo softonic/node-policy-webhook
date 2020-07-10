@@ -2,21 +2,22 @@
 K8s webhook handling profiles for tolerations, nodeSelector and nodeAffinity
 
 
-## TEST
+## DEVEL ENVIRONMENT
+
+### Requirements
+
+Install kind
+
+```bash
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.8.1/kind-$\(uname\)-amd64
+mv kind-darwin-amd64 /usr/local/bin/kind
+```
+
 
 ```bash
 
-kubectl label namespace default mutateme-
-make cert
-make apply-path
-make install
-make push  ### docker push to your favourite registry
-make deploy
-kubectl label namespace default mutateme=enabled
+make dev
+make deploy-dev
 ```
 
-then you can test if the mutating works
-
-```bash
-kubectl run --generator=run-pod/v1 -it --rm=true kdgb2 --restart=Never --image=nvucinic/kdbg --  /bin/bash
-```
+Now you can run a pod to test it
