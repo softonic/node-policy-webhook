@@ -114,6 +114,14 @@ func createPatch(pod *corev1.Pod, profileName string) ([]byte, error) {
 
 	tolerations := []corev1.Toleration{}
 
+	if len(pod.Spec.Tolerations) == 0 {
+		klog.Infof("Pod to be mutate has no tolerations")
+	}
+
+	if len(nodePolicyProfile.Spec.Tolerations) == 0 {
+		klog.Infof("Profile Policy %v has no tolerations defined")
+	}
+
 	tolerations = append(tolerations, pod.Spec.Tolerations...)
 
 	tolerations = append(tolerations, nodePolicyProfile.Spec.Tolerations...)
