@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
 	"net/http"
+	"fmt"
 )
 
 type patchOperation struct {
@@ -22,24 +23,27 @@ type patchOperation struct {
 }
 
 func createPatch(pod *v1.Pod, profileName string) ([]byte, error) {
-	patch := make([]patchOperation, 0)
+	//patch := make([]patchOperation, 0)
+
+	var patch = []patchOperation{}
 
 	nodePolicyProfile, err := getNodePolicyProfile(profileName)
 	if err != nil {
 		return nil, err
 	}
 
-	patch = addNodeSelectorPatch(nodePolicyProfile, patch)
+	addNodeSelectorPatch(nodePolicyProfile, &patch)
 
-	patch = addTolerationsPatch(pod, nodePolicyProfile, patch)
+	addTolerationsPatch(pod, nodePolicyProfile, &patch)
 
-	patch = addNodeAffinityPatch(pod, nodePolicyProfile, patch)
+	addNodeAffinityPatch(pod, nodePolicyProfile, &patch)
 
+	fmt.Println(patch)
 
 	return json.Marshal(patch)
 }
 
-func addNodeAffinityPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch []patchOperation) []patchOperation {
+func addNodeAffinityPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]patchOperation) {
 	affinity := v1.Affinity{}
 
 	affinity.NodeAffinity = &nodePolicyProfile.Spec.NodeAffinity
@@ -54,35 +58,35 @@ func addNodeAffinityPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyPro
 		}
 	}
 
-	return append(patch, patchOperation{
+	*patch = append(*patch, patchOperation{
 		Op:    "add",
 		Path:  "/spec/affinity",
 		Value: affinity,
 	})
 }
 
-func addTolerationsPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch []patchOperation) []patchOperation {
+func addTolerationsPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]patchOperation) {
 	tolerations := []v1.Toleration{}
 
 	tolerations = append(tolerations, pod.Spec.Tolerations...)
 
 	tolerations = append(tolerations, nodePolicyProfile.Spec.Tolerations...)
 
-	return append(patch, patchOperation{
+	*patch =  append(*patch, patchOperation{
 		Op:    "replace",
 		Path:  "/spec/tolerations",
 		Value: tolerations,
 	})
 }
 
-func addNodeSelectorPatch(nodePolicyProfile *v1alpha1.NodePolicyProfile, patch []patchOperation) []patchOperation {
+func addNodeSelectorPatch(nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]patchOperation)  {
 	nodeSelector := make(map[string]string)
 
 	for key, value := range nodePolicyProfile.Spec.NodeSelector {
 		nodeSelector[key] = value
 	}
 
-	return append(patch, patchOperation{
+	*patch = append(*patch, patchOperation{
 		Op:    "add",
 		Path:  "/spec/nodeSelector",
 		Value: nodeSelector,
