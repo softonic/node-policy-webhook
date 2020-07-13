@@ -132,6 +132,25 @@ func createPatch(pod *corev1.Pod, profileName string) ([]byte, error) {
 		Value: tolerations,
 	})
 
+
+	affinity := corev1.Affinity{}
+
+	affinity.NodeAffinity = &nodePolicyProfile.Spec.NodeAffinity
+
+	if  pod.Spec.Affinity.PodAntiAffinity != nil {
+		affinity.PodAntiAffinity = pod.Spec.Affinity.PodAntiAffinity
+	}
+
+	if  pod.Spec.Affinity.PodAffinity != nil {
+		affinity.PodAffinity = pod.Spec.Affinity.PodAffinity
+	}
+
+	patch = append(patch, patchOperation{
+		Op:    "add",
+		Path:  "/spec/affinity",
+		Value: affinity,
+	})
+
 	return json.Marshal(patch)
 }
 

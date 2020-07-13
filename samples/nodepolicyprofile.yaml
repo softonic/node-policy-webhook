@@ -10,3 +10,12 @@ spec:
     operator: "Equal"
     value: "stateless"
     effect: "NoSchedule"
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - preference:
+        matchExpressions:
+        - key: type
+          operator: In
+          values:
+          - stateless
+      weight: 1
