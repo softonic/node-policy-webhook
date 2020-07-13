@@ -29,11 +29,12 @@ func createPatch(pod *v1.Pod, profileName string) ([]byte, error) {
 		return nil, err
 	}
 
-	addNodeSelectorPatch(nodePolicyProfile, patch)
+	patch = addNodeSelectorPatch(nodePolicyProfile, patch)
 
-	addTolerationsPatch(pod, nodePolicyProfile, patch)
+	patch = addTolerationsPatch(pod, nodePolicyProfile, patch)
 
-	addNodeAffinityPatch(pod, nodePolicyProfile, patch)
+	patch = addNodeAffinityPatch(pod, nodePolicyProfile, patch)
+
 
 	return json.Marshal(patch)
 }
