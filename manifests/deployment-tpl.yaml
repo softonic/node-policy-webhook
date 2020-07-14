@@ -18,6 +18,9 @@ spec:
     spec:
       containers:
         - name: node-policy-webhook
+          args:
+          - --tls-cert=/etc/webhook/certs/cert.pem
+          - --tls-key=/etc/webhook/certs/key.pem
           image: ${IMAGE_GEN}
           imagePullPolicy: Never
           volumeMounts:
