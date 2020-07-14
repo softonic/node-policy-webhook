@@ -17,28 +17,29 @@ import (
 func PerformAdmissionReview(admissionReview *v1beta1.AdmissionReview) {
 	pod, err := getPod(admissionReview)
 	if err != nil {
-		admissionReview.Response = newAdmissionError(err)
+		admissionReview.Response = newAdmissionError(pod, err)
 		return
 	}
 
-	profile, err := getProfile(&pod)
+	profile, err := getProfile(pod)
 	if err != nil {
-		admissionReview.Response = admissionAllowedResponse()
+		admissionReview.Response = admissionAllowedResponse(pod)
 		return
 	}
 
 	nodePolicyProfile, err := getNodePolicyProfile(profile)
 	if err != nil {
-		admissionReview.Response = newAdmissionError(err)
+		admissionReview.Response = newAdmissionError(pod, err)
 		return
 	}
 
-	patchBytes, err := createPatch(&pod, nodePolicyProfile)
+	patchBytes, err := createPatch(pod, nodePolicyProfile)
 	if err != nil {
-		admissionReview.Response = newAdmissionError(err)
+		admissionReview.Response = newAdmissionError(pod, err)
 		return
 	}
 
+	klog.Info("Patching pod %s/%s", pod.Namespace, pod.Name)
 	patchType := v1beta1.PatchTypeJSONPatch
 
 	admissionReview.Response = &v1beta1.AdmissionResponse{
@@ -52,13 +53,24 @@ func PerformAdmissionReview(admissionReview *v1beta1.AdmissionReview) {
 	}
 }
 
-func newAdmissionError(err error) *v1beta1.AdmissionResponse {
-	klog.Errorf("Error %v", err)
+func newAdmissionError(pod *v1.Pod, err error) *v1beta1.AdmissionResponse {
+	if pod != nil {
+		klog.Errorf("Pod %s/%s failed admission review: %v", pod.Namespace, pod.Name, err)
+	} else {
+		klog.Errorf("Failed admission review: %v", err)
+	}
 	return &v1beta1.AdmissionResponse{
 		Result: &v12.Status{
 			Message: err.Error(),
 			Status:  "Fail",
 		},
+	}
+}
+
+func admissionAllowedResponse(pod *v1.Pod) *v1beta1.AdmissionResponse {
+	klog.Infof("Skipping admission review for pod %s/%s", pod.Namespace, pod.Name)
+	return &v1beta1.AdmissionResponse{
+		Allowed: true,
 	}
 }
 
@@ -102,17 +114,11 @@ func getProfile(pod *v1.Pod) (string, error) {
 	return "", errors.New("Annotation not found")
 }
 
-func getPod(admissionReview *v1beta1.AdmissionReview) (v1.Pod, error) {
+func getPod(admissionReview *v1beta1.AdmissionReview) (*v1.Pod, error) {
 	var pod v1.Pod
 	err := json.Unmarshal(admissionReview.Request.Object.Raw, &pod)
 	if err != nil {
-		return v1.Pod{}, err
+		return nil, err
 	}
-	return pod, nil
-}
-
-func admissionAllowedResponse() *v1beta1.AdmissionResponse {
-	return &v1beta1.AdmissionResponse{
-		Allowed: true,
-	}
+	return &pod, nil
 }
