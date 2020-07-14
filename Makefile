@@ -57,26 +57,25 @@ undeploy:
 .PHONY: deploy-dev
 deploy-dev: apply-patch
 	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
-	kubectl apply -f samples/nodepolicyprofile.yaml
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl apply -f manifests/deployment.yaml
 	kubectl apply -f manifests/service.yaml
 	kubectl apply -f manifests/mutatingwebhook.yaml
 	kubectl apply -f manifests/nodepolicyprofile_viewer_role.yaml
 	kubectl apply -f manifests/role_binding.yaml
+	kubectl apply -f samples/nodepolicyprofile.yaml
 
 .PHONY: deploy-prod
 deploy-prod: apply-patch
 	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
 	ko resolve -f manifests/deployment.yaml	> manifests/deployment-ko.yaml
-	kubectl apply -f samples/nodepolicyprofile.yaml
 	kubectl apply -f manifests/deployment-ko.yaml
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl apply -f manifests/service.yaml
 	kubectl apply -f manifests/mutatingwebhook.yaml
 	kubectl apply -f manifests/nodepolicyprofile_viewer_role.yaml
 	kubectl apply -f manifests/role_binding.yaml
-
+	kubectl apply -f samples/nodepolicyprofile.yaml
 
 .PHONY: up
 up: image undeploy deploy
