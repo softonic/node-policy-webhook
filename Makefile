@@ -57,6 +57,7 @@ undeploy:
 .PHONY: deploy-dev
 deploy-dev: apply-patch
 	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
+	kubectl apply -f samples/nodepolicyprofile.yaml
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl apply -f manifests/deployment.yaml
 	kubectl apply -f manifests/service.yaml
@@ -68,6 +69,7 @@ deploy-dev: apply-patch
 deploy-prod: apply-patch
 	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
 	ko resolve -f manifests/deployment.yaml	> manifests/deployment-ko.yaml
+	kubectl apply -f samples/nodepolicyprofile.yaml
 	kubectl apply -f manifests/deployment-ko.yaml
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl apply -f manifests/service.yaml
