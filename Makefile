@@ -18,7 +18,10 @@ deploy-dev:  export IMAGE_GEN = $(APP):$(VERSION)
 
 
 .PHONY: all
-all: image
+all: dev
+
+.PHONY: start
+start: dev deploy-dev
 
 .PHONY: build
 build: generate
@@ -59,6 +62,7 @@ deploy-dev: apply-patch
 	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl apply -f manifests/deployment.yaml
+	kubectl delete pod $$(kubectl get pods --selector=app=node-policy-webhook -o jsonpath='{.items..metadata.name}')
 	kubectl apply -f manifests/service.yaml
 	kubectl apply -f manifests/mutatingwebhook.yaml
 	kubectl apply -f manifests/nodepolicyprofile_viewer_role.yaml
@@ -70,6 +74,7 @@ deploy-prod: apply-patch
 	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
 	ko resolve -f manifests/deployment.yaml	> manifests/deployment-ko.yaml
 	kubectl apply -f manifests/deployment-ko.yaml
+	kubectl delete pod $$(kubectl get pods --selector=app=node-policy-webhook -o jsonpath='{.items..metadata.name}')
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl apply -f manifests/service.yaml
 	kubectl apply -f manifests/mutatingwebhook.yaml
