@@ -2,11 +2,15 @@ package main
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	_ "github.com/golang/glog"
+	"github.com/softonic/node-policy-webhook/pkg/admission"
 	h "github.com/softonic/node-policy-webhook/pkg/http"
 	"github.com/softonic/node-policy-webhook/pkg/version"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 	"k8s.io/klog"
 	"log"
 	"net/http"
@@ -59,7 +63,7 @@ func run(params *params) {
 	}
 
 	mux.HandleFunc("/mutate", func(w http.ResponseWriter, r *http.Request) {
-		h.MutationHandler(w, r)
+		h.MutationHandler(w, r, getNodePolicyAdmissionReviewer())
     })
     cfg := &tls.Config{
         MinVersion:               tls.VersionTLS12,
@@ -82,3 +86,17 @@ func run(params *params) {
 
 }
 
+func getNodePolicyAdmissionReviewer() *admission.NodePolicyAdmissionReviewer {
+	client, err := getRestClient()
+	if err != nil {
+		panic(err.Error())
+	}
+	return admission.NewNodePolicyAdmissionReviewer(client)
+}
+func getRestClient() (dynamic.Interface, error){
+	cfg, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, errors.New("Error configuring client")
+	}
+	return dynamic.NewForConfig(cfg)
+}

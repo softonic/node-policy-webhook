@@ -11,12 +11,20 @@ import (
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/rest"
 	"k8s.io/klog"
 )
 
+type NodePolicyAdmissionReviewer struct {
+	client dynamic.Interface
+}
+
+func NewNodePolicyAdmissionReviewer(client dynamic.Interface) *NodePolicyAdmissionReviewer {
+	return &NodePolicyAdmissionReviewer{
+		client: client,
+	}
+}
 // PerformAdmissionReview : It generates the Adminission Review Response
-func PerformAdmissionReview(admissionReview *v1beta1.AdmissionReview) {
+func (n *NodePolicyAdmissionReviewer) PerformAdmissionReview(admissionReview *v1beta1.AdmissionReview) {
 	pod, err := getPod(admissionReview)
 	if err != nil {
 		admissionReview.Response = newAdmissionError(pod, err)
@@ -29,7 +37,7 @@ func PerformAdmissionReview(admissionReview *v1beta1.AdmissionReview) {
 		return
 	}
 
-	nodePolicyProfile, err := getNodePolicyProfile(profile)
+	nodePolicyProfile, err := n.getNodePolicyProfile(profile)
 	if err != nil {
 		admissionReview.Response = newAdmissionError(pod, err)
 		return
@@ -76,19 +84,10 @@ func admissionAllowedResponse(pod *v1.Pod) *v1beta1.AdmissionResponse {
 	}
 }
 
-func getNodePolicyProfile(profileName string) (*v1alpha1.NodePolicyProfile, error) {
-	cfg, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, errors.New("Error configuring client")
-	}
-	client, err := dynamic.NewForConfig(cfg)
-	if err != nil {
-		return nil, errors.New("Error creating client")
-	}
-
+func (n *NodePolicyAdmissionReviewer) getNodePolicyProfile(profileName string) (*v1alpha1.NodePolicyProfile, error) {
 	resourceScheme := v1alpha1.SchemeBuilder.GroupVersion.WithResource("nodepolicyprofiles")
 
-	resp, err := client.Resource(resourceScheme).Get(context.TODO(), profileName, v12.GetOptions{})
+	resp, err := n.client.Resource(resourceScheme).Get(context.TODO(), profileName, v12.GetOptions{})
 	if err != nil {
 		klog.Errorf("Error getting NodePolicyProfile %s (%v)", profileName, err)
 		return nil, errors.New("Error getting NodePolicyProfile")

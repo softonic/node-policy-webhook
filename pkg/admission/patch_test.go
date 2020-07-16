@@ -122,7 +122,6 @@ func TestCreatePatchNodeAffinity(t *testing.T) {
 	}
 }
 
-
 func getNodePolicyProfileWithNodeSelector(nodeSelector map[string]string) *v1alpha1.NodePolicyProfile {
 	nodePolicyProfile := &v1alpha1.NodePolicyProfile{
 		TypeMeta:   metav1.TypeMeta{},

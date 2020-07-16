@@ -10,14 +10,14 @@ import (
 	"net/http"
 )
 
-func MutationHandler(w http.ResponseWriter, r *http.Request) {
+func MutationHandler(w http.ResponseWriter, r *http.Request, reviewer *admission.NodePolicyAdmissionReviewer) {
 
 	if err, status := validateRequest(r); err != nil {
 		http.Error(w, err.Error(), status)
 		return
 	}
 
-	resp, err := getResponse(r.Body)
+	resp, err := getResponse(r.Body, reviewer)
 	if err != nil {
 		failIfError(w, err)
 	}
@@ -28,14 +28,14 @@ func MutationHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getResponse(rawAdmissionReview io.Reader) ([]byte, error) {
+func getResponse(rawAdmissionReview io.Reader, reviewer *admission.NodePolicyAdmissionReviewer) ([]byte, error) {
 	admissionReview := &v1beta1.AdmissionReview{}
 	err := json.NewDecoder(rawAdmissionReview).Decode(admissionReview)
 	if err != nil {
 		return nil, err
 	}
 
-	admission.PerformAdmissionReview(admissionReview)
+	reviewer.PerformAdmissionReview(admissionReview)
 
 	resp, err := json.Marshal(admissionReview)
 	return resp, err
