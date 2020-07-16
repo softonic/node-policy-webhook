@@ -23,6 +23,7 @@ func NewNodePolicyProfileFetcher(client dynamic.Interface) NodePolicyProfileFetc
 		client: client,
 	}
 }
+
 func (n *NodePolicyProfileFetcher) Get(profileName string) (*v1alpha1.NodePolicyProfile, error) {
 	resourceScheme := v1alpha1.SchemeBuilder.GroupVersion.WithResource("nodepolicyprofiles")
 
