@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/softonic/node-policy-webhook/api/v1alpha1"
+	"github.com/softonic/node-policy-webhook/pkg/log"
 	"k8s.io/api/admission/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,7 +70,7 @@ func newAdmissionError(pod *v1.Pod, err error) *v1beta1.AdmissionResponse {
 }
 
 func admissionAllowedResponse(pod *v1.Pod) *v1beta1.AdmissionResponse {
-	klog.Infof("Skipping admission review for pod %s/%s", pod.Namespace, pod.Name)
+	klog.V(log.EXTENDED).Infof("Skipping admission review for pod %s/%s", pod.Namespace, pod.Name)
 	return &v1beta1.AdmissionResponse{
 		Allowed: true,
 	}
@@ -108,7 +109,7 @@ func getProfile(pod *v1.Pod) (string, error) {
 	}
 
 	if profileName, ok := annotations["softonic.io/profile"]; ok {
-		klog.Infof("Successfully found annotation softonic.io/profile. With profile: %v", profileName)
+		klog.V(log.INFO).Infof("Successfully found annotation softonic.io/profile. With profile: %v", profileName)
 		return profileName, nil
 	}
 
