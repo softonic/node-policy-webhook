@@ -32,6 +32,15 @@ build: generate
 		$(BUILD_IMAGE) \
 		/bin/sh -c "ARCH=$(ARCH) VERSION=$(VERSION) PKG=$(PKG) ./build/build"
 
+.PHONY: test
+test:
+	docker run -it \
+		-v $$(pwd):/go/src/$(PKG) \
+		-v $$(pwd)/bin/linux_$(ARCH):/go/bin \
+		-w /go/src/$(PKG) \
+		$(BUILD_IMAGE) \
+		/bin/sh -c "ARCH=$(ARCH) VERSION=$(VERSION) PKG=$(PKG) ./build/test"
+
 .PHONY: image
 image: build
 	docker build -t $(IMAGE):$(VERSION) -f Dockerfile .
