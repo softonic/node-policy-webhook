@@ -1,26 +1,22 @@
 package admission
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
-	"github.com/softonic/node-policy-webhook/api/v1alpha1"
 	"github.com/softonic/node-policy-webhook/pkg/log"
 	"k8s.io/api/admission/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/dynamic"
 	"k8s.io/klog"
 )
 
 type AdmissionReviewer struct {
-	client dynamic.Interface
+	fetcher NodePolicyProfileFetcherInterface
 }
 
-func NewNodePolicyAdmissionReviewer(client dynamic.Interface) *AdmissionReviewer {
+func NewNodePolicyAdmissionReviewer(fetcher NodePolicyProfileFetcherInterface) *AdmissionReviewer {
 	return &AdmissionReviewer{
-		client: client,
+		fetcher: fetcher,
 	}
 }
 
@@ -38,7 +34,7 @@ func (n *AdmissionReviewer) PerformAdmissionReview(admissionReview *v1beta1.Admi
 		return
 	}
 
-	nodePolicyProfile, err := n.getNodePolicyProfile(profile)
+	nodePolicyProfile, err := n.fetcher.Get(profile)
 	if err != nil {
 		admissionReview.Response = newAdmissionError(pod, err)
 		return
@@ -85,23 +81,6 @@ func admissionAllowedResponse(pod *v1.Pod) *v1beta1.AdmissionResponse {
 	}
 }
 
-func (n *AdmissionReviewer) getNodePolicyProfile(profileName string) (*v1alpha1.NodePolicyProfile, error) {
-	resourceScheme := v1alpha1.SchemeBuilder.GroupVersion.WithResource("nodepolicyprofiles")
-
-	resp, err := n.client.Resource(resourceScheme).Get(context.TODO(), profileName, v12.GetOptions{})
-	if err != nil {
-		klog.Errorf("Error getting NodePolicyProfile %s (%v)", profileName, err)
-		return nil, errors.New("Error getting NodePolicyProfile")
-	}
-
-	nodePolicyProfile := &v1alpha1.NodePolicyProfile{}
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(resp.UnstructuredContent(), nodePolicyProfile)
-	if err != nil {
-		return nil, errors.New("NodePolicyProfile not found")
-	}
-	return nodePolicyProfile, nil
-}
-
 func getProfile(pod *v1.Pod) (string, error) {
 	annotations := pod.ObjectMeta.GetAnnotations()
 	if annotations == nil {
@@ -118,6 +97,9 @@ func getProfile(pod *v1.Pod) (string, error) {
 
 func getPod(admissionReview *v1beta1.AdmissionReview) (*v1.Pod, error) {
 	var pod v1.Pod
+	if admissionReview.Request == nil {
+		return nil, errors.New("Request is nil")
+	}
 	err := json.Unmarshal(admissionReview.Request.Object.Raw, &pod)
 	if err != nil {
 		return nil, err

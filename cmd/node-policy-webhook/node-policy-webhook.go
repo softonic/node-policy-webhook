@@ -101,9 +101,12 @@ func getNodePolicyAdmissionReviewer() *admission.AdmissionReviewer {
 	if err != nil {
 		panic(err.Error())
 	}
-	return admission.NewNodePolicyAdmissionReviewer(client)
+	return admission.NewNodePolicyAdmissionReviewer(getNodePolicyProfileFetcher(client))
 }
 
+func getNodePolicyProfileFetcher(client dynamic.Interface) admission.NodePolicyProfileFetcherInterface {
+	return admission.NewNodePolicyProfileFetcher(client)
+}
 func getRestClient() (dynamic.Interface, error) {
 	cfg, err := rest.InClusterConfig()
 	if err != nil {
