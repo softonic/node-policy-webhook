@@ -14,17 +14,18 @@ import (
 	"k8s.io/klog"
 )
 
-type NodePolicyAdmissionReviewer struct {
+type AdmissionReviewer struct {
 	client dynamic.Interface
 }
 
-func NewNodePolicyAdmissionReviewer(client dynamic.Interface) *NodePolicyAdmissionReviewer {
-	return &NodePolicyAdmissionReviewer{
+func NewNodePolicyAdmissionReviewer(client dynamic.Interface) *AdmissionReviewer {
+	return &AdmissionReviewer{
 		client: client,
 	}
 }
+
 // PerformAdmissionReview : It generates the Adminission Review Response
-func (n *NodePolicyAdmissionReviewer) PerformAdmissionReview(admissionReview *v1beta1.AdmissionReview) {
+func (n *AdmissionReviewer) PerformAdmissionReview(admissionReview *v1beta1.AdmissionReview) {
 	pod, err := getPod(admissionReview)
 	if err != nil {
 		admissionReview.Response = newAdmissionError(pod, err)
@@ -56,10 +57,10 @@ func (n *NodePolicyAdmissionReviewer) PerformAdmissionReview(admissionReview *v1
 		Result: &v12.Status{
 			Status: "Success",
 		},
-		Patch:            patchBytes,
-		PatchType:        &patchType,
-		Allowed:          true,
-		UID:              admissionReview.Request.UID,
+		Patch:     patchBytes,
+		PatchType: &patchType,
+		Allowed:   true,
+		UID:       admissionReview.Request.UID,
 	}
 }
 
@@ -84,7 +85,7 @@ func admissionAllowedResponse(pod *v1.Pod) *v1beta1.AdmissionResponse {
 	}
 }
 
-func (n *NodePolicyAdmissionReviewer) getNodePolicyProfile(profileName string) (*v1alpha1.NodePolicyProfile, error) {
+func (n *AdmissionReviewer) getNodePolicyProfile(profileName string) (*v1alpha1.NodePolicyProfile, error) {
 	resourceScheme := v1alpha1.SchemeBuilder.GroupVersion.WithResource("nodepolicyprofiles")
 
 	resp, err := n.client.Resource(resourceScheme).Get(context.TODO(), profileName, v12.GetOptions{})

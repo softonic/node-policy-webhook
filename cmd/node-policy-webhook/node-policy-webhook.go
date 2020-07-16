@@ -19,9 +19,15 @@ import (
 )
 
 type params struct {
-	version bool
+	version     bool
 	certificate string
-	privateKey string
+	privateKey  string
+}
+
+var handler *h.HttpHandler
+
+func init() {
+	handler = getHttpHandler()
 }
 
 func main() {
@@ -47,7 +53,6 @@ func main() {
 	rootCmd.MarkFlagRequired("tls-cert")
 	rootCmd.MarkFlagRequired("tls-key")
 
-
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -63,37 +68,43 @@ func run(params *params) {
 	}
 
 	mux.HandleFunc("/mutate", func(w http.ResponseWriter, r *http.Request) {
-		h.MutationHandler(w, r, getNodePolicyAdmissionReviewer())
-    })
-    cfg := &tls.Config{
-        MinVersion:               tls.VersionTLS12,
-        CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
-        PreferServerCipherSuites: true,
-        CipherSuites: []uint16{
-            tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-            tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-            tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-            tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-        },
-    }
-    srv := &http.Server{
-        Addr:         ":443",
-        Handler:      mux,
-        TLSConfig:    cfg,
-        TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
-    }
-    log.Fatal(srv.ListenAndServeTLS(params.certificate, params.privateKey))
+		handler.MutationHandler(w, r)
+	})
+
+	cfg := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		PreferServerCipherSuites: true,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+		},
+	}
+	srv := &http.Server{
+		Addr:         ":443",
+		Handler:      mux,
+		TLSConfig:    cfg,
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+	}
+	log.Fatal(srv.ListenAndServeTLS(params.certificate, params.privateKey))
 
 }
 
-func getNodePolicyAdmissionReviewer() *admission.NodePolicyAdmissionReviewer {
+func getHttpHandler() *h.HttpHandler {
+	return h.NewHttpHanlder(getNodePolicyAdmissionReviewer())
+}
+
+func getNodePolicyAdmissionReviewer() *admission.AdmissionReviewer {
 	client, err := getRestClient()
 	if err != nil {
 		panic(err.Error())
 	}
 	return admission.NewNodePolicyAdmissionReviewer(client)
 }
-func getRestClient() (dynamic.Interface, error){
+
+func getRestClient() (dynamic.Interface, error) {
 	cfg, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, errors.New("Error configuring client")

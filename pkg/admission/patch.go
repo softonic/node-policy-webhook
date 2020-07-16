@@ -7,8 +7,6 @@ import (
 	"reflect"
 )
 
-
-
 type patchOperation struct {
 	Op    string      `json:"op"`
 	Path  string      `json:"path"`
@@ -19,9 +17,7 @@ func createPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile) ([]
 	var patch = []patchOperation{}
 
 	addNodeSelectorPatch(nodePolicyProfile, &patch)
-
 	addTolerationsPatch(pod, nodePolicyProfile, &patch)
-
 	addNodeAffinityPatch(pod, nodePolicyProfile, &patch)
 
 	return json.Marshal(patch)
@@ -63,7 +59,7 @@ func addTolerationsPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProf
 
 	tolerations = append(tolerations, nodePolicyProfile.Spec.Tolerations...)
 
-	*patch =  append(*patch, patchOperation{
+	*patch = append(*patch, patchOperation{
 		Op:    "replace",
 		Path:  "/spec/tolerations",
 		Value: tolerations,
@@ -87,4 +83,3 @@ func addNodeSelectorPatch(nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *
 		Value: nodeSelector,
 	})
 }
-

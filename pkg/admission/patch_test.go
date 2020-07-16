@@ -93,18 +93,18 @@ func TestCreatePatchNodeAffinity(t *testing.T) {
 
 	nodeSelector := v1.NodeSelector{
 		NodeSelectorTerms: []v1.NodeSelectorTerm{
-		{
-			MatchExpressions: []v1.NodeSelectorRequirement{
-				{
-					Key:      "foo",
-					Operator: "equals",
-					Values:   []string{
-						"bar",
+			{
+				MatchExpressions: []v1.NodeSelectorRequirement{
+					{
+						Key:      "foo",
+						Operator: "equals",
+						Values: []string{
+							"bar",
+						},
 					},
 				},
 			},
-		},
-	}}
+		}}
 	nodePolicyProfile := getNodePolicyProfileWithNodeAffinity(v1.NodeAffinity{
 		RequiredDuringSchedulingIgnoredDuringExecution: &nodeSelector,
 	})
