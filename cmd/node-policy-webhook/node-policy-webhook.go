@@ -51,19 +51,34 @@ func main() {
 }
 
 func run(params *params) {
+	mux := http.NewServeMux()
+
 	_, err := tls.LoadX509KeyPair(params.certificate, params.privateKey)
 	if err != nil {
 		klog.Errorf("Failed to load key pair: %v", err)
 	}
 
-	http.HandleFunc("/mutate", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/mutate", func(w http.ResponseWriter, r *http.Request) {
 		h.MutationHandler(w, r)
-	})
-	if err := http.ListenAndServeTLS(":443", params.certificate, params.privateKey, nil); err != nil {
-		log.Println(err)
-		klog.Errorf("Failed to listen and serve webhook server: %v", err)
-
-	}
+    })
+    cfg := &tls.Config{
+        MinVersion:               tls.VersionTLS12,
+        CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+        PreferServerCipherSuites: true,
+        CipherSuites: []uint16{
+            tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+            tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+            tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+            tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+        },
+    }
+    srv := &http.Server{
+        Addr:         ":443",
+        Handler:      mux,
+        TLSConfig:    cfg,
+        TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+    }
+    log.Fatal(srv.ListenAndServeTLS(params.certificate, params.privateKey))
 
 }
 
