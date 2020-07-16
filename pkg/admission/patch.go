@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/softonic/node-policy-webhook/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
+	"reflect"
 )
 
 
@@ -27,8 +28,11 @@ func createPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile) ([]
 }
 
 func addNodeAffinityPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]patchOperation) {
-	affinity := v1.Affinity{}
+	if reflect.DeepEqual(nodePolicyProfile.Spec.NodeAffinity, v1.NodeAffinity{}) {
+		return
+	}
 
+	affinity := v1.Affinity{}
 
 	affinity.NodeAffinity = &nodePolicyProfile.Spec.NodeAffinity
 
@@ -43,13 +47,16 @@ func addNodeAffinityPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyPro
 	}
 
 	*patch = append(*patch, patchOperation{
-		Op:    "add",
+		Op:    "replace",
 		Path:  "/spec/affinity",
 		Value: affinity,
 	})
 }
 
 func addTolerationsPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]patchOperation) {
+	if pod.Spec.Tolerations == nil && nodePolicyProfile.Spec.Tolerations == nil {
+		return
+	}
 	tolerations := []v1.Toleration{}
 
 	tolerations = append(tolerations, pod.Spec.Tolerations...)
@@ -64,6 +71,10 @@ func addTolerationsPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProf
 }
 
 func addNodeSelectorPatch(nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]patchOperation) {
+	if nodePolicyProfile.Spec.NodeSelector == nil {
+		return
+	}
+
 	nodeSelector := make(map[string]string)
 
 	for key, value := range nodePolicyProfile.Spec.NodeSelector {
@@ -71,7 +82,7 @@ func addNodeSelectorPatch(nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *
 	}
 
 	*patch = append(*patch, patchOperation{
-		Op:    "add",
+		Op:    "replace",
 		Path:  "/spec/nodeSelector",
 		Value: nodeSelector,
 	})

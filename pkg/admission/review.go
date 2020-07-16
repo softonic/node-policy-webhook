@@ -41,7 +41,7 @@ func PerformAdmissionReview(admissionReview *v1beta1.AdmissionReview) {
 		return
 	}
 
-	klog.Info("Patching pod %s/%s", pod.Namespace, pod.Name)
+	klog.V(log.INFO).Infof("Patching pod %s/%s", pod.Namespace, pod.Name)
 	patchType := v1beta1.PatchTypeJSONPatch
 
 	admissionReview.Response = &v1beta1.AdmissionResponse{
