@@ -80,7 +80,11 @@ version:
 
 .PHONY: manifests
 manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=manifests
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:crd:artifacts:config=manifests
+
+.PHONY: helm-chart
+helm-chart: controller-gen
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:crd:artifacts:config=chart/node-policy-webhook/templates
 
 .PHONY: generate
 generate: controller-gen
