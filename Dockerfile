@@ -1,5 +1,7 @@
 FROM golang:1.14-buster AS build
 
+ENV GOBIN=$GOPATH/bin
+
 ADD . /src/node-policy-webhook
 
 WORKDIR /src/node-policy-webhook
