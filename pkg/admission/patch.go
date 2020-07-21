@@ -1,29 +1,37 @@
 package admission
 
 import (
-	"encoding/json"
 	"github.com/softonic/node-policy-webhook/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"reflect"
 )
 
-type patchOperation struct {
+type PatcherInterface interface {
+	CreatePatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile) *[]PatchOperation
+}
+
+type Patcher struct{}
+
+type PatchOperation struct {
 	Op    string      `json:"op"`
 	Path  string      `json:"path"`
 	Value interface{} `json:"value,omitempty"`
 }
 
-func createPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile) ([]byte, error) {
-	var patch = []patchOperation{}
-
-	addNodeSelectorPatch(nodePolicyProfile, &patch)
-	addTolerationsPatch(pod, nodePolicyProfile, &patch)
-	addNodeAffinityPatch(pod, nodePolicyProfile, &patch)
-
-	return json.Marshal(patch)
+func NewPatcher() PatcherInterface {
+	return &Patcher{}
 }
 
-func addNodeAffinityPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]patchOperation) {
+func (p *Patcher) CreatePatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile) *[]PatchOperation {
+	var patch = &[]PatchOperation{}
+
+	p.addNodeSelectorPatch(nodePolicyProfile, patch)
+	p.addTolerationsPatch(pod, nodePolicyProfile, patch)
+	p.addNodeAffinityPatch(pod, nodePolicyProfile, patch)
+	return patch
+}
+
+func (p *Patcher) addNodeAffinityPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]PatchOperation) {
 	if reflect.DeepEqual(nodePolicyProfile.Spec.NodeAffinity, v1.NodeAffinity{}) {
 		return
 	}
@@ -42,14 +50,14 @@ func addNodeAffinityPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyPro
 		}
 	}
 
-	*patch = append(*patch, patchOperation{
+	*patch = append(*patch, PatchOperation{
 		Op:    "replace",
 		Path:  "/spec/affinity",
 		Value: affinity,
 	})
 }
 
-func addTolerationsPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]patchOperation) {
+func (p *Patcher) addTolerationsPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]PatchOperation) {
 	if pod.Spec.Tolerations == nil && nodePolicyProfile.Spec.Tolerations == nil {
 		return
 	}
@@ -59,14 +67,14 @@ func addTolerationsPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.NodePolicyProf
 
 	tolerations = append(tolerations, nodePolicyProfile.Spec.Tolerations...)
 
-	*patch = append(*patch, patchOperation{
+	*patch = append(*patch, PatchOperation{
 		Op:    "replace",
 		Path:  "/spec/tolerations",
 		Value: tolerations,
 	})
 }
 
-func addNodeSelectorPatch(nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]patchOperation) {
+func (p *Patcher) addNodeSelectorPatch(nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *[]PatchOperation) {
 	if nodePolicyProfile.Spec.NodeSelector == nil {
 		return
 	}
@@ -77,7 +85,7 @@ func addNodeSelectorPatch(nodePolicyProfile *v1alpha1.NodePolicyProfile, patch *
 		nodeSelector[key] = value
 	}
 
-	*patch = append(*patch, patchOperation{
+	*patch = append(*patch, PatchOperation{
 		Op:    "replace",
 		Path:  "/spec/nodeSelector",
 		Value: nodeSelector,

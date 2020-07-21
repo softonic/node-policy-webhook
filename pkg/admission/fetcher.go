@@ -10,7 +10,7 @@ import (
 	"k8s.io/klog"
 )
 
-type NodePolicyProfileFetcherInterface interface {
+type FetcherInterface interface {
 	Get(profileName string) (*v1alpha1.NodePolicyProfile, error)
 }
 
@@ -18,7 +18,7 @@ type NodePolicyProfileFetcher struct {
 	client dynamic.Interface
 }
 
-func NewNodePolicyProfileFetcher(client dynamic.Interface) NodePolicyProfileFetcherInterface {
+func NewNodePolicyProfileFetcher(client dynamic.Interface) FetcherInterface {
 	return &NodePolicyProfileFetcher{
 		client: client,
 	}

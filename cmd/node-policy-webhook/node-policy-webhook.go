@@ -101,10 +101,13 @@ func getNodePolicyAdmissionReviewer() *admission.AdmissionReviewer {
 	if err != nil {
 		panic(err.Error())
 	}
-	return admission.NewNodePolicyAdmissionReviewer(getNodePolicyProfileFetcher(client))
+	return admission.NewNodePolicyAdmissionReviewer(
+		getFetcher(client),
+		admission.NewPatcher(),
+	)
 }
 
-func getNodePolicyProfileFetcher(client dynamic.Interface) admission.NodePolicyProfileFetcherInterface {
+func getFetcher(client dynamic.Interface) admission.FetcherInterface {
 	return admission.NewNodePolicyProfileFetcher(client)
 }
 func getRestClient() (dynamic.Interface, error) {

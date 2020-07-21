@@ -1,91 +1,108 @@
 package admission
 
 import (
-	"bytes"
 	"github.com/softonic/node-policy-webhook/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"reflect"
 	"testing"
 )
+
+var p = &Patcher{}
+
+func expectPatch(t *testing.T, expectedPatch []PatchOperation, patch *[]PatchOperation) {
+	if reflect.DeepEqual(expectedPatch, patch) {
+		t.Errorf("Patch should match expected patch %v, got %v", expectedPatch, patch)
+	}
+}
 
 func TestCreatePatchWhenNodeSelectorNotSpecified(t *testing.T) {
 	pod := getPodWithNodeSelector(map[string]string{
 		"type": "foobar",
 	})
-	nodePolicyProfile := getNodePolicyProfileWithTolerations()
-
-	patch, err := createPatch(pod, nodePolicyProfile)
-
-	expectedPatch := []byte("[{\"op\":\"replace\",\"path\":\"/spec/tolerations\",\"value\":[{\"key\":\"foo\",\"operator\":\"equals\",\"value\":\"bar\",\"effect\":\"NoSchedule\"}]}]")
-
-	if err != nil {
-		t.Errorf("Expecting patch %s, got error %v", string(expectedPatch), err)
+	tolerations := &[]v1.Toleration{
+		{
+			Key:      "foo",
+			Operator: "equals",
+			Value:    "bar",
+			Effect:   "NoSchedule",
+		},
 	}
+	nodePolicyProfile := getNodePolicyProfileWithTolerations(tolerations)
 
-	if bytes.Compare(patch, expectedPatch) != 0 {
-		t.Errorf("Patch should match expected patch %s, got %s", string(expectedPatch), string(patch))
+	patch := p.CreatePatch(pod, nodePolicyProfile)
+
+	expectedPatch := []PatchOperation{
+		{
+			Op:    "replace",
+			Path:  "/spec/toleration",
+			Value: tolerations,
+		},
 	}
+	expectPatch(t, expectedPatch, patch)
 }
 
 func TestCreatePatchWhenNodeSelectorEmpty(t *testing.T) {
-	pod := getPodWithNodeSelector(map[string]string{
+	nodeSelector := map[string]string{
 		"type": "foobar",
-	})
+	}
+	pod := getPodWithNodeSelector(nodeSelector)
 	nodePolicyProfile := getNodePolicyProfileWithNodeSelector(map[string]string{})
 
-	patch, err := createPatch(pod, nodePolicyProfile)
+	patch := p.CreatePatch(pod, nodePolicyProfile)
 
-	expectedPatch := []byte("[{\"op\":\"replace\",\"path\":\"/spec/nodeSelector\",\"value\":{}}]")
-
-	if err != nil {
-		t.Errorf("Expecting patch %s, got error %v", string(expectedPatch), err)
+	expectedPatch := []PatchOperation{
+		{
+			Op:    "replace",
+			Path:  "/spec/toleration",
+			Value: nodeSelector,
+		},
 	}
-
-	if bytes.Compare(patch, expectedPatch) != 0 {
-		t.Errorf("Patch should match expected patch %s, got %s", string(expectedPatch), string(patch))
-	}
+	expectPatch(t, expectedPatch, patch)
 }
 
 func TestCreatePatchWhenNodeSelectorSameKeyDifferentValue(t *testing.T) {
-	pod := getPodWithNodeSelector(map[string]string{
+	podNodeSelector := map[string]string{
 		"type": "foobar",
-	})
-	nodePolicyProfile := getNodePolicyProfileWithNodeSelector(map[string]string{
+	}
+	pod := getPodWithNodeSelector(podNodeSelector)
+
+	profileNodeSelector := map[string]string{
 		"type": "barfoo",
-	})
-
-	patch, err := createPatch(pod, nodePolicyProfile)
-
-	expectedPatch := []byte("[{\"op\":\"replace\",\"path\":\"/spec/nodeSelector\",\"value\":{\"type\":\"barfoo\"}}]")
-
-	if err != nil {
-		t.Errorf("Expecting patch %s, got error %v", string(expectedPatch), err)
 	}
+	nodePolicyProfile := getNodePolicyProfileWithNodeSelector(profileNodeSelector)
 
-	if bytes.Compare(patch, expectedPatch) != 0 {
-		t.Errorf("Patch should match expected patch %s, got %s", string(expectedPatch), string(patch))
+	patch := p.CreatePatch(pod, nodePolicyProfile)
+	expectedPatch := []PatchOperation{
+		{
+			Op:    "replace",
+			Path:  "/spec/toleration",
+			Value: profileNodeSelector,
+		},
 	}
+	expectPatch(t, expectedPatch, patch)
 }
 
 func TestCreatePatchWhenNodeSelectorDifferentKey(t *testing.T) {
-	pod := getPodWithNodeSelector(map[string]string{
+	podNodeSelector := map[string]string{
 		"type": "foobar",
-	})
-	nodePolicyProfile := getNodePolicyProfileWithNodeSelector(map[string]string{
+	}
+	pod := getPodWithNodeSelector(podNodeSelector)
+
+	profileNodeSelector := map[string]string{
 		"anotherkey": "barfoo",
-	})
-
-	patch, err := createPatch(pod, nodePolicyProfile)
-
-	expectedPatch := []byte("[{\"op\":\"replace\",\"path\":\"/spec/nodeSelector\",\"value\":{\"anotherkey\":\"barfoo\"}}]")
-
-	if err != nil {
-		t.Errorf("Expecting patch %s, got error %v", string(expectedPatch), err)
 	}
+	nodePolicyProfile := getNodePolicyProfileWithNodeSelector(profileNodeSelector)
 
-	if bytes.Compare(patch, expectedPatch) != 0 {
-		t.Errorf("Patch should match expected patch %s, got %s", string(expectedPatch), string(patch))
+	patch := p.CreatePatch(pod, nodePolicyProfile)
+	expectedPatch := []PatchOperation{
+		{
+			Op:    "replace",
+			Path:  "/spec/toleration",
+			Value: profileNodeSelector,
+		},
 	}
+	expectPatch(t, expectedPatch, patch)
 }
 
 func TestCreatePatchNodeAffinity(t *testing.T) {
@@ -105,21 +122,21 @@ func TestCreatePatchNodeAffinity(t *testing.T) {
 				},
 			},
 		}}
-	nodePolicyProfile := getNodePolicyProfileWithNodeAffinity(v1.NodeAffinity{
+	nodeAffinity := v1.NodeAffinity{
 		RequiredDuringSchedulingIgnoredDuringExecution: &nodeSelector,
-	})
-
-	patch, err := createPatch(pod, nodePolicyProfile)
-
-	expectedPatch := []byte("[{\"op\":\"replace\",\"path\":\"/spec/affinity\",\"value\":{\"nodeAffinity\":{\"requiredDuringSchedulingIgnoredDuringExecution\":{\"nodeSelectorTerms\":[{\"matchExpressions\":[{\"key\":\"foo\",\"operator\":\"equals\",\"values\":[\"bar\"]}]}]}}}}]")
-
-	if err != nil {
-		t.Errorf("Expecting patch %s, got error %v", string(expectedPatch), err)
 	}
+	nodePolicyProfile := getNodePolicyProfileWithNodeAffinity(nodeAffinity)
 
-	if bytes.Compare(patch, expectedPatch) != 0 {
-		t.Errorf("Patch should match expected patch %s, got %s", string(expectedPatch), string(patch))
+	patch := p.CreatePatch(pod, nodePolicyProfile)
+
+	expectedPatch := []PatchOperation{
+		{
+			Op:    "replace",
+			Path:  "/spec/toleration",
+			Value: nodeAffinity,
+		},
 	}
+	expectPatch(t, expectedPatch, patch)
 }
 
 func getNodePolicyProfileWithNodeSelector(nodeSelector map[string]string) *v1alpha1.NodePolicyProfile {
@@ -134,20 +151,13 @@ func getNodePolicyProfileWithNodeSelector(nodeSelector map[string]string) *v1alp
 	return nodePolicyProfile
 }
 
-func getNodePolicyProfileWithTolerations() *v1alpha1.NodePolicyProfile {
-	tolerations := []v1.Toleration{
-		{
-			Key:      "foo",
-			Operator: "equals",
-			Value:    "bar",
-			Effect:   "NoSchedule",
-		},
-	}
+func getNodePolicyProfileWithTolerations(tolerations *[]v1.Toleration) *v1alpha1.NodePolicyProfile {
+
 	nodePolicyProfile := &v1alpha1.NodePolicyProfile{
 		TypeMeta:   metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{},
 		Spec: v1alpha1.NodePolicyProfileSpec{
-			Tolerations: tolerations,
+			Tolerations: *tolerations,
 		},
 		Status: v1alpha1.NodePolicyProfileStatus{},
 	}
