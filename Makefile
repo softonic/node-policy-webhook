@@ -25,24 +25,14 @@ start: dev deploy-dev
 
 .PHONY: build
 build: generate
-	docker run -it \
-		-v $$(pwd):/go/src/$(PKG) \
-		-v $$(pwd)/bin/linux_$(ARCH):/go/bin \
-		-w /go/src/$(PKG) \
-		$(BUILD_IMAGE) \
-		/bin/sh -c "ARCH=$(ARCH) VERSION=$(VERSION) PKG=$(PKG) ./build/build"
+	GOARCH=${ARCH} go install -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
 
 .PHONY: test
 test:
-	docker run -it \
-		-v $$(pwd):/go/src/$(PKG) \
-		-v $$(pwd)/bin/linux_$(ARCH):/go/bin \
-		-w /go/src/$(PKG) \
-		$(BUILD_IMAGE) \
-		/bin/sh -c "ARCH=$(ARCH) VERSION=$(VERSION) PKG=$(PKG) ./build/test"
+	GOARCH=${ARCH} go test -v -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./...
 
 .PHONY: image
-image: build
+image:
 	docker build -t $(IMAGE):$(VERSION) -f Dockerfile .
 	docker tag $(IMAGE):$(VERSION) $(IMAGE):latest
 
@@ -58,16 +48,12 @@ cert:
 apply-patch: cert
 	ssl/patch_ca_bundle.sh
 
-.PHONY: clean
-clean:
-	rm -fr bin .go
-
 .PHONY: undeploy
 undeploy:
 	kubectl delete -f manifests/ || true
 
 .PHONY: deploy-dev
-deploy-dev: apply-patch
+deploy: apply-patch
 	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
 	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
 	kubectl apply -f manifests/deployment.yaml
@@ -78,33 +64,13 @@ deploy-dev: apply-patch
 	kubectl apply -f manifests/role_binding.yaml
 	kubectl apply -f samples/nodepolicyprofile.yaml
 
-.PHONY: deploy-prod
-deploy-prod: apply-patch
-	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
-	ko resolve -f manifests/deployment.yaml	> manifests/deployment-ko.yaml
-	kubectl apply -f manifests/deployment-ko.yaml
-	kubectl delete pod $$(kubectl get pods --selector=app=node-policy-webhook -o jsonpath='{.items..metadata.name}')
-	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
-	kubectl apply -f manifests/service.yaml
-	kubectl apply -f manifests/mutatingwebhook.yaml
-	kubectl apply -f manifests/nodepolicyprofile_viewer_role.yaml
-	kubectl apply -f manifests/role_binding.yaml
-	kubectl apply -f samples/nodepolicyprofile.yaml
-
 .PHONY: up
 up: image undeploy deploy
 
-.PHONY: push
-push:
+.PHONY: docker-push
+docker-push:
 	docker push $(IMAGE):$(VERSION)
-
-.PHONY: push-latest
-push-latest:
 	docker push $(IMAGE):latest
-
-.PHONY: ko-publish
-ko-publish:
-	ko publish cmd/$(APP)/$(APP).go
 
 .PHONY: version
 version:
