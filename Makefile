@@ -25,6 +25,7 @@ start: dev deploy-dev
 
 .PHONY: build
 build: generate
+	go mod download
 	GOARCH=${ARCH} go install -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
 
 .PHONY: test

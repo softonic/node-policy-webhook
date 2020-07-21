@@ -4,8 +4,7 @@ ADD . /src/node-policy-webhook
 
 WORKDIR /src/node-policy-webhook
 
-RUN go mod download &&\
- GOARCH=${ARCH} go install -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
+RUN make build
 
 FROM debian:buster-slim
 
