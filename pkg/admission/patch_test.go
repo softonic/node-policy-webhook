@@ -105,7 +105,66 @@ func TestCreatePatchWhenNodeSelectorDifferentKey(t *testing.T) {
 	expectPatch(t, expectedPatch, patch)
 }
 
-func TestCreatePatchNodeAffinity(t *testing.T) {
+func TestCreatePatchWhenNodeAffinity(t *testing.T) {
+
+
+	nodeSelectorPod := v1.NodeSelector{
+		NodeSelectorTerms: []v1.NodeSelectorTerm{
+			{
+				MatchExpressions: []v1.NodeSelectorRequirement{
+					{
+						Key:      "bar",
+						Operator: "equals",
+						Values: []string{
+							"foo",
+						},
+					},
+				},
+			},
+		}}
+	nodeAffinityPod := v1.NodeAffinity{
+		RequiredDuringSchedulingIgnoredDuringExecution: &nodeSelectorPod,
+	}
+
+	Affinity := v1.Affinity{
+		NodeAffinity: &nodeAffinityPod,
+	}
+
+	pod := getPodWithAffinity(Affinity)
+
+
+	nodeSelector := v1.NodeSelector{
+		NodeSelectorTerms: []v1.NodeSelectorTerm{
+			{
+				MatchExpressions: []v1.NodeSelectorRequirement{
+					{
+						Key:      "foo",
+						Operator: "equals",
+						Values: []string{
+							"bar",
+						},
+					},
+				},
+			},
+		}}
+	nodeAffinity := v1.NodeAffinity{
+		RequiredDuringSchedulingIgnoredDuringExecution: &nodeSelector,
+	}
+	nodePolicyProfile := getNodePolicyProfileWithNodeAffinity(nodeAffinity)
+
+	patch := p.CreatePatch(pod, nodePolicyProfile)
+
+	expectedPatch := []PatchOperation{
+		{
+			Op:    "replace",
+			Path:  "/spec/affinity",
+			Value: nodeAffinity,
+		},
+	}
+	expectPatch(t, expectedPatch, patch)
+}
+
+func TestCreatePatchWithoutNodeAffinity(t *testing.T) {
 	pod := getPodWithAffinity(v1.Affinity{})
 
 	nodeSelector := v1.NodeSelector{
@@ -132,7 +191,7 @@ func TestCreatePatchNodeAffinity(t *testing.T) {
 	expectedPatch := []PatchOperation{
 		{
 			Op:    "replace",
-			Path:  "/spec/toleration",
+			Path:  "/spec/affinity",
 			Value: nodeAffinity,
 		},
 	}
@@ -140,8 +199,6 @@ func TestCreatePatchNodeAffinity(t *testing.T) {
 }
 
 func TestCreatePatchWithPodAntiAffinity(t *testing.T) {
-
-
 
 	WeightedPodAffinityTerm := []v1.WeightedPodAffinityTerm{
 		v1.WeightedPodAffinityTerm{
