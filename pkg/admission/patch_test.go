@@ -164,7 +164,7 @@ func TestCreatePatchWhenNodeAffinity(t *testing.T) {
 	expectPatch(t, expectedPatch, patch)
 }
 
-func TestCreatePatchWithoutNodeAffinity(t *testing.T) {
+func TestCreatePatchPodWithoutNodeAffinity(t *testing.T) {
 	pod := getPodWithAffinity(v1.Affinity{})
 
 	nodeSelector := v1.NodeSelector{
@@ -198,7 +198,7 @@ func TestCreatePatchWithoutNodeAffinity(t *testing.T) {
 	expectPatch(t, expectedPatch, patch)
 }
 
-func TestCreatePatchWithPodAntiAffinity(t *testing.T) {
+func TestCreatePatchWithPodAntiAffinityAndProfileNoAffinity(t *testing.T) {
 
 	WeightedPodAffinityTerm := []v1.WeightedPodAffinityTerm{
 		v1.WeightedPodAffinityTerm{
@@ -215,6 +215,39 @@ func TestCreatePatchWithPodAntiAffinity(t *testing.T) {
 			},
 		},
 	}
+
+	podAntiAffinity := v1.PodAntiAffinity{
+		PreferredDuringSchedulingIgnoredDuringExecution: WeightedPodAffinityTerm,
+	}
+
+
+	affinity := v1.Affinity{}
+	
+
+	expectedAffinity := v1.Affinity{
+		PodAntiAffinity: &podAntiAffinity,
+	}
+
+	pod := getPodWithAffinity(affinity)
+
+	nodeAffinity := v1.NodeAffinity{}
+
+	nodePolicyProfile := getNodePolicyProfileWithNodeAffinity(nodeAffinity)
+
+	patch := p.CreatePatch(pod, nodePolicyProfile)
+
+	expectedPatch := []PatchOperation{
+		{
+			Op:    "replace",
+			Path:  "/spec/affinity",
+			Value: expectedAffinity,
+		},
+	}
+	expectPatch(t, expectedPatch, patch)
+}
+
+func TestCreatePatchWithPodAntiAffinity(t *testing.T) {
+	pod := getPodWithAffinity(v1.Affinity{})
 
 	nodeSelector := v1.NodeSelector{
 		NodeSelectorTerms: []v1.NodeSelectorTerm{
@@ -233,22 +266,6 @@ func TestCreatePatchWithPodAntiAffinity(t *testing.T) {
 	nodeAffinity := v1.NodeAffinity{
 		RequiredDuringSchedulingIgnoredDuringExecution: &nodeSelector,
 	}
-
-	podAntiAffinity := v1.PodAntiAffinity{
-		PreferredDuringSchedulingIgnoredDuringExecution: WeightedPodAffinityTerm,
-	}
-
-	affinity := v1.Affinity{
-		PodAntiAffinity: &podAntiAffinity,
-	}
-
-	expectedAffinity := v1.Affinity{
-		PodAntiAffinity: &podAntiAffinity,
-		NodeAffinity: &nodeAffinity,
-	}
-
-	pod := getPodWithAffinity(affinity)
-
 	nodePolicyProfile := getNodePolicyProfileWithNodeAffinity(nodeAffinity)
 
 	patch := p.CreatePatch(pod, nodePolicyProfile)
@@ -257,11 +274,12 @@ func TestCreatePatchWithPodAntiAffinity(t *testing.T) {
 		{
 			Op:    "replace",
 			Path:  "/spec/affinity",
-			Value: expectedAffinity,
+			Value: nodeAffinity,
 		},
 	}
 	expectPatch(t, expectedPatch, patch)
 }
+
 
 func getNodePolicyProfileWithNodeSelector(nodeSelector map[string]string) *v1alpha1.NodePolicyProfile {
 	nodePolicyProfile := &v1alpha1.NodePolicyProfile{
