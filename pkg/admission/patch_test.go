@@ -139,6 +139,73 @@ func TestCreatePatchNodeAffinity(t *testing.T) {
 	expectPatch(t, expectedPatch, patch)
 }
 
+func TestCreatePatchWithPodAntiAffinity(t *testing.T) {
+
+
+
+	WeightedPodAffinityTerm := []v1.WeightedPodAffinityTerm{
+		v1.WeightedPodAffinityTerm{
+			Weight: 100,
+			PodAffinityTerm: v1.PodAffinityTerm{
+			LabelSelector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "foo",
+					"component": "bar",
+					"release": "test",
+					},
+				},
+				TopologyKey: "kubernetes.io/hostname",
+			},
+		},
+	}
+
+	nodeSelector := v1.NodeSelector{
+		NodeSelectorTerms: []v1.NodeSelectorTerm{
+			{
+				MatchExpressions: []v1.NodeSelectorRequirement{
+					{
+						Key:      "foo",
+						Operator: "equals",
+						Values: []string{
+							"bar",
+						},
+					},
+				},
+			},
+		}}
+	nodeAffinity := v1.NodeAffinity{
+		RequiredDuringSchedulingIgnoredDuringExecution: &nodeSelector,
+	}
+
+	podAntiAffinity := v1.PodAntiAffinity{
+		PreferredDuringSchedulingIgnoredDuringExecution: WeightedPodAffinityTerm,
+	}
+
+	affinity := v1.Affinity{
+		PodAntiAffinity: &podAntiAffinity,
+	}
+
+	expectedAffinity := v1.Affinity{
+		PodAntiAffinity: &podAntiAffinity,
+		NodeAffinity: &nodeAffinity,
+	}
+
+	pod := getPodWithAffinity(affinity)
+
+	nodePolicyProfile := getNodePolicyProfileWithNodeAffinity(nodeAffinity)
+
+	patch := p.CreatePatch(pod, nodePolicyProfile)
+
+	expectedPatch := []PatchOperation{
+		{
+			Op:    "replace",
+			Path:  "/spec/affinity",
+			Value: expectedAffinity,
+		},
+	}
+	expectPatch(t, expectedPatch, patch)
+}
+
 func getNodePolicyProfileWithNodeSelector(nodeSelector map[string]string) *v1alpha1.NodePolicyProfile {
 	nodePolicyProfile := &v1alpha1.NodePolicyProfile{
 		TypeMeta:   metav1.TypeMeta{},
