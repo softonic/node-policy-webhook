@@ -38,6 +38,3 @@ spec:
       - name: webhook-certs
         secret:
           secretName: node-policy-webhook
-      - name: webhook-config
-        configMap:
-          name: sidecar-injector-webhook-configmap
