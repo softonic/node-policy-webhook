@@ -14,7 +14,7 @@ BUILD_IMAGE ?= golang:1.14-buster
 
 deploy-prod: export IMAGE_GEN = "github.com/softonic/node-policy-webhook/cmd/node-policy-webhook"
 
-deploy-dev:  export IMAGE_GEN = $(APP):$(VERSION)
+deploy:  export IMAGE_GEN = $(APP):$(VERSION)
 
 
 .PHONY: all
@@ -26,7 +26,8 @@ start: dev deploy-dev
 .PHONY: build
 build: generate
 	go mod download
-	GOARCH=${ARCH} go install -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
+	##GOARCH=${ARCH} go install -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
+	GOARCH=${ARCH} go build -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
 
 .PHONY: test
 test:

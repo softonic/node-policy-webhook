@@ -10,7 +10,7 @@ RUN make build
 
 FROM debian:buster-slim
 
-COPY --from=build /src/node-policy-webhook/bin/linux_amd64/node-policy-webhook /node-policy-webhook
+COPY --from=build /src/node-policy-webhook/node-policy-webhook /node-policy-webhook
 
 EXPOSE 443
 
