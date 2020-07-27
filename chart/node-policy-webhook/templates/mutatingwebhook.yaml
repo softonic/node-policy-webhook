@@ -15,8 +15,8 @@ webhooks:
     clientConfig:
       caBundle: {{ .Values.caBundle }}
       service:
-        name: node-policy-webhook
-        namespace: default
+        name: {{ include "node-policy-webhook.fullname" . }}
+        namespace: {{ .Release.Namespace }}
         path: "/mutate"
         port: 443
     rules:
