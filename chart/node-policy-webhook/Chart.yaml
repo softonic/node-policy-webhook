@@ -1,0 +1,6 @@
+apiVersion: v2
+name: node-policy-webhook
+description: Apply profiles of tolerations, nodeSelector and nodeAffinities by webhook
+type: application
+version: 0.1.0
+appVersion: 0.1.0

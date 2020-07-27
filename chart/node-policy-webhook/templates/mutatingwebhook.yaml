@@ -1,0 +1,30 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "node-policy-webhook.fullname" . }}
+  labels:
+    {{- include "node-policy-webhook.labels" . | nindent 4 }}
+webhooks:
+  - name: {{ include "node-policy-webhook.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+    objectSelector:
+      matchExpressions:
+        - key: app
+          operator: NotIn
+          values: ["node-policy-webhook"]
+    clientConfig:
+      caBundle: {{ .Values.caBundle }}
+      service:
+        name: node-policy-webhook
+        namespace: default
+        path: "/mutate"
+        port: 443
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    sideEffects: None
+    timeoutSeconds: 5
+    reinvocationPolicy: Never
+    failurePolicy: Ignore
