@@ -83,7 +83,7 @@ secret-values:
 	./hack/generate_helm_cert_secrets $(APP) $(NAMESPACE)
 
 .PHONY: manifests
-manifests: controller-gen secret-values
+manifests: controller-gen helm-chart secret-values
 	docker run --rm -v $(PWD):/app -w /app/ alpine/helm:3.2.3 template --release-name $(RELEASE_NAME) --set "image.tag=$(VERSION)" -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook > manifests/manifest.yaml
 
 .PHONY: helm-chart
