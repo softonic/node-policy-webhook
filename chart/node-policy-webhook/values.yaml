@@ -5,9 +5,9 @@
 replicaCount: 1
 
 image:
-  repository: node-policy-webhook
+  repository: softonic/node-policy-webhook
   pullPolicy: IfNotPresent
-  tag: 0.1.0
+  tag: 0.1.1
 
 imagePullSecrets: []
 nameOverride: ""
