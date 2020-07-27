@@ -54,7 +54,7 @@ func TestCreatePatchWhenNodeSelectorEmpty(t *testing.T) {
 	expectedPatch := []PatchOperation{
 		{
 			Op:    "replace",
-			Path:  "/spec/toleration",
+			Path:  "/spec/nodeSelector",
 			Value: nodeSelector,
 		},
 	}
@@ -76,7 +76,7 @@ func TestCreatePatchWhenNodeSelectorSameKeyDifferentValue(t *testing.T) {
 	expectedPatch := []PatchOperation{
 		{
 			Op:    "replace",
-			Path:  "/spec/toleration",
+			Path:  "/spec/nodeSelector",
 			Value: profileNodeSelector,
 		},
 	}
@@ -98,7 +98,7 @@ func TestCreatePatchWhenNodeSelectorDifferentKey(t *testing.T) {
 	expectedPatch := []PatchOperation{
 		{
 			Op:    "replace",
-			Path:  "/spec/toleration",
+			Path:  "/spec/nodeSelector",
 			Value: profileNodeSelector,
 		},
 	}
@@ -193,6 +193,33 @@ func TestCreatePatchPodWithoutNodeAffinity(t *testing.T) {
 			Op:    "replace",
 			Path:  "/spec/affinity",
 			Value: nodeAffinity,
+		},
+	}
+	expectPatch(t, expectedPatch, patch)
+}
+
+func TestCreatePatchTolerationsIdempotent(t *testing.T) {
+
+	tolerations := &[]v1.Toleration{
+		{
+			Key:      "foo",
+			Operator: "equals",
+			Value:    "bar",
+			Effect:   "NoSchedule",
+		},
+	}
+
+	pod := getPodWithTolerations(tolerations)
+
+	nodePolicyProfile := getNodePolicyProfileWithTolerations(tolerations)
+
+	patch := p.CreatePatch(pod, nodePolicyProfile)
+
+	expectedPatch := []PatchOperation{
+		{
+			Op:    "replace",
+			Path:  "/spec/tolerations",
+			Value: tolerations,
 		},
 	}
 	expectPatch(t, expectedPatch, patch)
@@ -335,6 +362,17 @@ func getPodWithAffinity(affinity v1.Affinity) *v1.Pod {
 		ObjectMeta: metav1.ObjectMeta{},
 		Spec: v1.PodSpec{
 			Affinity: &affinity,
+		},
+		Status: v1.PodStatus{},
+	}
+}
+
+func getPodWithTolerations(tolerations *[]v1.Toleration) *v1.Pod {
+	return &v1.Pod{
+		TypeMeta:   metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{},
+		Spec: v1.PodSpec{
+			Tolerations: *tolerations,
 		},
 		Status: v1.PodStatus{},
 	}
