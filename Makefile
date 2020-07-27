@@ -42,29 +42,13 @@ image:
 dev: image
 	kind load docker-image $(IMAGE):$(VERSION)
 
-.PHONY: cert
-cert:
-	ssl/ssl.sh $(APP) $(NAMESPACE)
-
-.PHONY: apply-patch
-apply-patch: cert
-	ssl/patch_ca_bundle.sh
-
 .PHONY: undeploy
 undeploy:
-	kubectl delete -f manifests/ || true
+	kubectl delete -f manifest.yaml || true
 
-.PHONY: deploy-dev
-deploy: apply-patch
-	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
-	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
-	kubectl apply -f manifests/deployment.yaml
-	kubectl delete pod $$(kubectl get pods --selector=app=node-policy-webhook -o jsonpath='{.items..metadata.name}')
-	kubectl apply -f manifests/service.yaml
-	kubectl apply -f manifests/mutatingwebhook.yaml
-	kubectl apply -f manifests/nodepolicyprofile_viewer_role.yaml
-	kubectl apply -f manifests/role_binding.yaml
-	kubectl apply -f samples/nodepolicyprofile.yaml
+.PHONY: deploy
+deploy: manifest
+	kubectl apply -f manifest.yaml
 
 .PHONY: up
 up: image undeploy deploy
@@ -82,9 +66,9 @@ version:
 secret-values:
 	./hack/generate_helm_cert_secrets $(APP) $(NAMESPACE)
 
-.PHONY: manifests
-manifests: controller-gen helm-chart secret-values
-	docker run --rm -v $(PWD):/app -w /app/ alpine/helm:3.2.3 template --release-name $(RELEASE_NAME) --set "image.tag=$(VERSION)" -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook > manifests/manifest.yaml
+.PHONY: manifest
+manifest: controller-gen helm-chart secret-values
+	docker run --rm -v $(PWD):/app -w /app/ alpine/helm:3.2.3 template --release-name $(RELEASE_NAME) --set "image.tag=$(VERSION)" -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook > manifest.yaml
 
 .PHONY: helm-chart
 helm-chart: controller-gen

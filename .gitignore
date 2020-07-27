@@ -1,5 +1,5 @@
 ssl/*.csr
 ssl/*.key
 ssl/*.pem
-manifests/*
+manifest.yaml
 chart/node-policy-webhook/secret.values.yaml
