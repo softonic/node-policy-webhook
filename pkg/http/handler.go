@@ -20,6 +20,14 @@ func NewHttpHanlder(reviewer *admission.AdmissionReviewer) *HttpHandler {
 	}
 }
 
+func (h *HttpHandler) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	klog.Warning("Responding HC")
+	w.WriteHeader(http.StatusOK)
+	if _, err := w.Write([]byte("ok")); err != nil {
+		failIfError(w, err)
+	}
+}
+
 func (h *HttpHandler) MutationHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err, status := validateRequest(r); err != nil {

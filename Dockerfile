@@ -12,8 +12,4 @@ FROM debian:buster-slim
 
 COPY --from=build /src/node-policy-webhook/node-policy-webhook /node-policy-webhook
 
-EXPOSE 443
-
-USER 1000
-
 ENTRYPOINT ["/node-policy-webhook"]

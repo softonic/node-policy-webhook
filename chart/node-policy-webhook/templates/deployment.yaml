@@ -31,9 +31,12 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: BIND_ADDRESS
+              value: {{ include "node-policy-webhook.bindAddress" . | quote }}
           ports:
             - name: https
-              containerPort: 443
+              containerPort: {{ .Values.bindPort }}
               protocol: TCP
           livenessProbe:
             httpGet:

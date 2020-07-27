@@ -1,7 +1,7 @@
 BIN := node-policy-webhook
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 PKG := github.com/softonic/node-policy-webhook
-VERSION := 0.0.0-dev
+VERSION := 0.0.4-dev
 ARCH := amd64
 APP := node-policy-webhook
 NAMESPACE := default

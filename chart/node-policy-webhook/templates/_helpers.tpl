@@ -57,3 +57,14 @@ Create the name of the service account to use
 {{- define "node-policy-webhook.serviceAccountName" -}}
 {{ default (include "node-policy-webhook.fullname" .) .Values.serviceAccount.name }}
 {{- end -}}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "node-policy-webhook.bindAddress" -}}
+{{- if .Values.bindAddress -}}
+{{- .Values.bindAddress | quote }}
+{{- else }}
+{{- printf "%s:%s" (default "0.0.0.0" .Values.bindHost) (toString .Values.bindPort) }}
+{{- end }}
+{{- end -}}
