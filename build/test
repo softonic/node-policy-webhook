@@ -1,5 +1,0 @@
-#!/bin/sh
-
-set -ex
-
-GOARCH=${ARCH} go test -v -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./...
