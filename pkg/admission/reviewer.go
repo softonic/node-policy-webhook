@@ -80,7 +80,7 @@ func (r *AdmissionReviewer) newAdmissionError(pod *v1.Pod, err error) *v1beta1.A
 }
 
 func (r *AdmissionReviewer) admissionAllowedResponse(pod *v1.Pod) *v1beta1.AdmissionResponse {
-	klog.V(log.EXTENDED).Infof("Skipping admission review for pod %s/%s", pod.Namespace, pod.Name)
+	klog.Errorf("Skipping admission review for pod %s/%s", pod.Namespace, pod.Name)
 	return &v1beta1.AdmissionResponse{
 		Allowed: true,
 	}

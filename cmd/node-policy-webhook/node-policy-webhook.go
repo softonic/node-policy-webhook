@@ -28,8 +28,6 @@ const DEFAULT_BIND_ADDRESS = ":8443"
 var handler *h.HttpHandler
 
 func init() {
-	klog.V(0).Infof("Starting node-policy-webhook")
-
 	handler = getHttpHandler()
 }
 
@@ -56,7 +54,6 @@ func main() {
 	rootCmd.MarkFlagRequired("tls-cert")
 	rootCmd.MarkFlagRequired("tls-key")
 
-	klog.V(0).Infof("Command initialised")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -92,7 +89,7 @@ func run(params *params) {
 	if address == "" {
 		address = DEFAULT_BIND_ADDRESS
 	}
-	klog.V(0).Infof("Starting server, bund at %v", address)
+	klog.V(0).Infof("Starting server, bound at %v", address)
 	klog.Infof("Listening to address %v", address)
 	srv := &http.Server{
 		Addr:         address,
