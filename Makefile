@@ -1,7 +1,7 @@
 BIN := node-policy-webhook
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 PKG := github.com/softonic/node-policy-webhook
-VERSION := 0.0.5-dev
+VERSION := 0.1.0-dev
 ARCH := amd64
 APP := node-policy-webhook
 NAMESPACE := default
@@ -73,6 +73,10 @@ manifest: controller-gen helm-chart secret-values
 .PHONY: helm-chart
 helm-chart: controller-gen
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:crd:artifacts:config=chart/node-policy-webhook/templates
+
+.PHONY: helm-deploy
+helm-deploy: helm-chart secret-values
+	helm upgrade --install $(RELEASE_NAME) --namespace $(NAMESPACE) --set "image.tag=$(VERSION)" -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook
 
 .PHONY: generate
 generate: controller-gen
