@@ -1,9 +1,9 @@
 package admission
 
 import (
+	"reflect"
 	"github.com/softonic/node-policy-webhook/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
-	"reflect"
 )
 
 type PatcherInterface interface {
@@ -65,7 +65,19 @@ func (p *Patcher) addTolerationsPatch(pod *v1.Pod, nodePolicyProfile *v1alpha1.N
 
 	tolerations = append(tolerations, pod.Spec.Tolerations...)
 
-	tolerations = append(tolerations, nodePolicyProfile.Spec.Tolerations...)
+	tolerationEqual := false
+
+	for _,tolerationPod := range pod.Spec.Tolerations{
+		for _,tolerationProfile := range nodePolicyProfile.Spec.Tolerations{
+			if (reflect.DeepEqual(tolerationPod,tolerationProfile )) {
+				tolerationEqual = true
+			}
+		}
+	} 	
+
+	if tolerationEqual == false {
+		tolerations = append(tolerations, nodePolicyProfile.Spec.Tolerations...)
+	}
 
 	*patch = append(*patch, PatchOperation{
 		Op:    "replace",
