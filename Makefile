@@ -1,10 +1,11 @@
 BIN := node-policy-webhook
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 PKG := github.com/softonic/node-policy-webhook
-VERSION := 0.0.4-dev
+VERSION := 0.0.5-dev
 ARCH := amd64
 APP := node-policy-webhook
 NAMESPACE := default
+RELEASE_NAME := node-policy-webhook
 KO_DOCKER_REPO = registry.softonic.io/node-policy-webhook
 
 IMAGE := $(BIN)
@@ -26,7 +27,6 @@ start: dev deploy-dev
 .PHONY: build
 build: generate
 	go mod download
-	##GOARCH=${ARCH} go install -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
 	GOARCH=${ARCH} go build -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
 
 .PHONY: test
@@ -78,9 +78,13 @@ docker-push:
 version:
 	@echo $(VERSION)
 
+.PHONY: secret-values
+secret-values:
+	./hack/generate_helm_cert_secrets $(APP) $(NAMESPACE)
+
 .PHONY: manifests
-manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:crd:artifacts:config=manifests
+manifests: controller-gen secret-values
+	docker run --rm -v $(PWD):/app -w /app/ alpine/helm:3.2.3 template --release-name $(RELEASE_NAME) --set "image.tag=$(VERSION)" -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook > manifests/manifest.yaml
 
 .PHONY: helm-chart
 helm-chart: controller-gen

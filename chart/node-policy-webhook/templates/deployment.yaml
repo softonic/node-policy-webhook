@@ -40,10 +40,12 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
+              scheme: HTTPS
               path: /
               port: https
           readinessProbe:
             httpGet:
+              scheme: HTTPS
               path: /
               port: https
           volumeMounts:
