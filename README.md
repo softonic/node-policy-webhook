@@ -17,11 +17,10 @@ mv kind-darwin-amd64 /usr/local/bin/kind
 ```bash
 
 make dev
-make deploy-dev
+make deploy
 ```
 
 Now you can run a pod to test it
-
 
 
 # Motivation

@@ -21,9 +21,6 @@ deploy:  export IMAGE_GEN = $(APP):$(VERSION)
 .PHONY: all
 all: dev
 
-.PHONY: start
-start: dev deploy-dev
-
 .PHONY: build
 build: generate
 	go mod download
