@@ -8,5 +8,5 @@ roleRef:
   name: nodepolicyprofile-viewer-role
 subjects:
 - kind: ServiceAccount
-  name: default
-  namespace: default
+  name: {{ include "node-policy-webhook.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}

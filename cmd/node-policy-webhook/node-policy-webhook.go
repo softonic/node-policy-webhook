@@ -12,7 +12,6 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -24,9 +23,13 @@ type params struct {
 	privateKey  string
 }
 
+const DEFAULT_BIND_ADDRESS = ":8443"
+
 var handler *h.HttpHandler
 
 func init() {
+	klog.V(0).Infof("Starting node-policy-webhook")
+
 	handler = getHttpHandler()
 }
 
@@ -53,6 +56,7 @@ func main() {
 	rootCmd.MarkFlagRequired("tls-cert")
 	rootCmd.MarkFlagRequired("tls-key")
 
+	klog.V(0).Infof("Command initialised")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -70,7 +74,9 @@ func run(params *params) {
 	mux.HandleFunc("/mutate", func(w http.ResponseWriter, r *http.Request) {
 		handler.MutationHandler(w, r)
 	})
-
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		handler.HealthCheckHandler(w, r)
+	})
 	cfg := &tls.Config{
 		MinVersion:               tls.VersionTLS12,
 		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
@@ -82,13 +88,19 @@ func run(params *params) {
 			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
 		},
 	}
+	address := os.Getenv("BIND_ADDRESS")
+	if address == "" {
+		address = DEFAULT_BIND_ADDRESS
+	}
+	klog.V(0).Infof("Starting server, bund at %v", address)
+	klog.Infof("Listening to address %v", address)
 	srv := &http.Server{
-		Addr:         ":8443",
+		Addr:         address,
 		Handler:      mux,
 		TLSConfig:    cfg,
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 	}
-	log.Fatal(srv.ListenAndServeTLS(params.certificate, params.privateKey))
+	klog.Fatalf("Could not start server: %v", srv.ListenAndServeTLS(params.certificate, params.privateKey))
 
 }
 

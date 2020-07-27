@@ -1,10 +1,11 @@
 BIN := node-policy-webhook
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 PKG := github.com/softonic/node-policy-webhook
-VERSION := 0.0.0-dev
+VERSION := 0.0.5-dev
 ARCH := amd64
 APP := node-policy-webhook
 NAMESPACE := default
+RELEASE_NAME := node-policy-webhook
 KO_DOCKER_REPO = registry.softonic.io/node-policy-webhook
 
 IMAGE := $(BIN)
@@ -26,7 +27,6 @@ start: dev deploy-dev
 .PHONY: build
 build: generate
 	go mod download
-	##GOARCH=${ARCH} go install -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
 	GOARCH=${ARCH} go build -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
 
 .PHONY: test
@@ -42,29 +42,13 @@ image:
 dev: image
 	kind load docker-image $(IMAGE):$(VERSION)
 
-.PHONY: cert
-cert:
-	ssl/ssl.sh $(APP) $(NAMESPACE)
-
-.PHONY: apply-patch
-apply-patch: cert
-	ssl/patch_ca_bundle.sh
-
 .PHONY: undeploy
 undeploy:
-	kubectl delete -f manifests/ || true
+	kubectl delete -f manifest.yaml || true
 
-.PHONY: deploy-dev
-deploy: apply-patch
-	cat manifests/deployment-tpl.yaml | envsubst > manifests/deployment.yaml
-	kubectl apply -f manifests/noodepolicies.softonic.io_nodepolicyprofiles.yaml
-	kubectl apply -f manifests/deployment.yaml
-	kubectl delete pod $$(kubectl get pods --selector=app=node-policy-webhook -o jsonpath='{.items..metadata.name}')
-	kubectl apply -f manifests/service.yaml
-	kubectl apply -f manifests/mutatingwebhook.yaml
-	kubectl apply -f manifests/nodepolicyprofile_viewer_role.yaml
-	kubectl apply -f manifests/role_binding.yaml
-	kubectl apply -f samples/nodepolicyprofile.yaml
+.PHONY: deploy
+deploy: manifest
+	kubectl apply -f manifest.yaml
 
 .PHONY: up
 up: image undeploy deploy
@@ -78,9 +62,17 @@ docker-push:
 version:
 	@echo $(VERSION)
 
-.PHONY: manifests
-manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=manifests
+.PHONY: secret-values
+secret-values:
+	./hack/generate_helm_cert_secrets $(APP) $(NAMESPACE)
+
+.PHONY: manifest
+manifest: controller-gen helm-chart secret-values
+	docker run --rm -v $(PWD):/app -w /app/ alpine/helm:3.2.3 template --release-name $(RELEASE_NAME) --set "image.tag=$(VERSION)" -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook > manifest.yaml
+
+.PHONY: helm-chart
+helm-chart: controller-gen
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:crd:artifacts:config=chart/node-policy-webhook/templates
 
 .PHONY: generate
 generate: controller-gen
