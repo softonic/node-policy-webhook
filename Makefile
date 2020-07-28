@@ -1,11 +1,11 @@
 BIN := node-policy-webhook
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 PKG := github.com/softonic/node-policy-webhook
-VERSION := 0.1.0-dev
-ARCH := amd64
-APP := node-policy-webhook
-NAMESPACE := default
-RELEASE_NAME := node-policy-webhook
+VERSION ?= 0.1.0-dev
+ARCH ?= amd64
+APP ?= node-policy-webhook
+NAMESPACE ?= default
+RELEASE_NAME ?= node-policy-webhook
 KO_DOCKER_REPO = registry.softonic.io/node-policy-webhook
 
 IMAGE := $(BIN)
