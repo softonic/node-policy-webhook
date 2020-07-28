@@ -1,3 +1,4 @@
+ssl/csr.conf
 ssl/*.csr
 ssl/*.key
 ssl/*.pem
