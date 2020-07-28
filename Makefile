@@ -7,6 +7,7 @@ APP ?= node-policy-webhook
 NAMESPACE ?= default
 RELEASE_NAME ?= node-policy-webhook
 KO_DOCKER_REPO = registry.softonic.io/node-policy-webhook
+REPOSITORY ?= node-policy-webhook
 
 IMAGE := $(BIN)
 
@@ -65,7 +66,7 @@ secret-values:
 
 .PHONY: manifest
 manifest: controller-gen helm-chart secret-values
-	docker run --rm -v $(PWD):/app -w /app/ alpine/helm:3.2.3 template --release-name $(RELEASE_NAME) --set "image.tag=$(VERSION)" -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook > manifest.yaml
+	docker run --rm -v $(PWD):/app -w /app/ alpine/helm:3.2.3 template --release-name $(RELEASE_NAME) --set "image.tag=$(VERSION)" --set "image.repository=$(REPOSITORY)"  -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook > manifest.yaml
 
 .PHONY: helm-chart
 helm-chart: controller-gen
