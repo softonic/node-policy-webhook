@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	_ "github.com/golang/glog"
 	"github.com/softonic/node-policy-webhook/pkg/admission"
 	h "github.com/softonic/node-policy-webhook/pkg/http"
 	"github.com/softonic/node-policy-webhook/pkg/version"
@@ -15,6 +14,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"flag"
+	"github.com/spf13/pflag"
 )
 
 type params struct {
@@ -47,10 +48,14 @@ func main() {
 			}
 		},
 	}
-	rootCmd.Flags().BoolVarP(&params.version, "version", "v", false, "print version and exit")
+
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	flag.CommandLine.Parse([]string{})
+
+	rootCmd.Flags().BoolVarP(&params.version, "version", "n", false, "print version and exit")
 	rootCmd.Flags().StringVarP(&params.certificate, "tls-cert", "c", "default", "certificate (required)")
 	rootCmd.Flags().StringVarP(&params.privateKey, "tls-key", "p", "default", "privateKey (required)")
-
+	
 	rootCmd.MarkFlagRequired("tls-cert")
 	rootCmd.MarkFlagRequired("tls-key")
 
@@ -89,7 +94,7 @@ func run(params *params) {
 	if address == "" {
 		address = DEFAULT_BIND_ADDRESS
 	}
-	klog.V(0).Infof("Starting server, bound at %v", address)
+	klog.V(4).Infof("Starting server, bound at %v", address)
 	klog.Infof("Listening to address %v", address)
 	srv := &http.Server{
 		Addr:         address,
