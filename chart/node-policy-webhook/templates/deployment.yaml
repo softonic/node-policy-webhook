@@ -27,6 +27,7 @@ spec:
           args:
             - --tls-cert={{ .Values.certs.mountPath }}/cert.pem
             - --tls-key={{ .Values.certs.mountPath }}/key.pem
+            - -v=2
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
