@@ -4,6 +4,12 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"net/http"
+	"os"
+	"path"
+
+
+	"github.com/golang/glog"
 	"github.com/softonic/node-policy-webhook/pkg/admission"
 	h "github.com/softonic/node-policy-webhook/pkg/http"
 	"github.com/softonic/node-policy-webhook/pkg/version"
@@ -11,10 +17,10 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
-	"net/http"
-	"os"
-	"path"
-	"flag"
+
+	goflag "flag"
+	
+
 	"github.com/spf13/pflag"
 )
 
@@ -36,11 +42,17 @@ func main() {
 	var params params
 
 	commandName := path.Base(os.Args[0])
+	
+	pflag.CommandLine.AddGoFlag(goflag.CommandLine.Lookup("v"))
+
+
+	pflag.CommandLine.Parse([]string{})
 
 	rootCmd := &cobra.Command{
 		Use:   commandName,
 		Short: fmt.Sprintf("%v handles node policy profiles in kubernetes", commandName),
 		Run: func(cmd *cobra.Command, args []string) {
+
 			if params.version {
 				fmt.Println("Version:", version.Version)
 			} else {
@@ -49,13 +61,14 @@ func main() {
 		},
 	}
 
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	flag.CommandLine.Parse([]string{})
+
 
 	rootCmd.Flags().BoolVarP(&params.version, "version", "n", false, "print version and exit")
 	rootCmd.Flags().StringVarP(&params.certificate, "tls-cert", "c", "default", "certificate (required)")
 	rootCmd.Flags().StringVarP(&params.privateKey, "tls-key", "p", "default", "privateKey (required)")
 	
+
+
 	rootCmd.MarkFlagRequired("tls-cert")
 	rootCmd.MarkFlagRequired("tls-key")
 
@@ -94,15 +107,15 @@ func run(params *params) {
 	if address == "" {
 		address = DEFAULT_BIND_ADDRESS
 	}
-	klog.V(4).Infof("Starting server, bound at %v", address)
-	klog.Infof("Listening to address %v", address)
+	glog.V(2).Infof("Starting server, bound at %v", address)
+	glog.Infof("Listening to address %v", address)
 	srv := &http.Server{
 		Addr:         address,
 		Handler:      mux,
 		TLSConfig:    cfg,
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 	}
-	klog.Fatalf("Could not start server: %v", srv.ListenAndServeTLS(params.certificate, params.privateKey))
+	glog.Fatalf("Could not start server: %v", srv.ListenAndServeTLS(params.certificate, params.privateKey))
 
 }
 
