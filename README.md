@@ -11,11 +11,12 @@ Install kind
 ```bash
 curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.8.1/kind-$\(uname\)-amd64
 mv kind-darwin-amd64 /usr/local/bin/kind
+kind create cluster
 ```
 
+Compile the code and deploy the needed resources
 
 ```bash
-
 make dev
 make deploy
 ```
@@ -84,6 +85,20 @@ and will remove the nodeAffinities
 ```
 Assigning pods to nodes:
 
-You can constrain a Pod to only be able to run on particular Node(s), or to prefer to run on particular nodes. There are several ways to do this, and the recommended approaches all use label selectors to make the selection. Generally such constraints are unnecessary, as the scheduler will automatically do a reasonable placement (e.g. spread your pods across nodes, not place the pod on a node with insufficient free resources, etc.) but there are some circumstances where you may want more control on a node where a pod lands, for example to ensure that a pod ends up on a machine with an SSD attached to it, or to co-locate pods from two different services that communicate a lot into the same availability zone.
+You can constrain a Pod to only be able to run on particular Node(s), or to prefer to run on particular nodes. 
+There are several ways to do this, and the recommended approaches all use label selectors to make the selection. 
+Generally such constraints are unnecessary, as the scheduler will automatically do a reasonable 
+placement (e.g. spread your pods across nodes, not place the pod on a node with insufficient free resources, etc.) 
+but there are some circumstances where you may want more control on a node where a pod lands, for example to ensure 
+that a pod ends up on a machine with an SSD attached to it, or to co-locate pods from two different 
+services that communicate a lot into the same availability zone.
 
 ```
+
+
+## Internals
+
+Take a look at this internals documentation.  [Internals](/docs/internals.md).
+
+
+
