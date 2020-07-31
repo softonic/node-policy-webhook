@@ -102,9 +102,9 @@ services that communicate a lot into the same availability zone.
 ```
 
 
-## Internals
+# Internals
 
-Take a look at this internals documentation.  [Internals](/docs/internals.md).
-
-
+* Dynamic Webhooks | [docs/internals.md][PlDb]
+* Our Webhook | [docs/webhook.md][PlDb]
+* Makefile - Build and Deploy | [docs/makefile.md][PlDb]
 
