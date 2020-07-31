@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	_ "net/http/pprof"
 )
 
 type params struct {
