@@ -2,6 +2,8 @@
 [![Go Report Card](https://goreportcard.com/badge/softonic/node-policy-webhook)](https://goreportcard.com/report/softonic/node-policy-webhook)
 [![Releases](https://img.shields.io/github/release-pre/softonic/node-policy-webhook.svg?sort=semver)](https://github.com/softonic/node-policy-webhook/releases)
 [![LICENSE](https://img.shields.io/github/license/softonic/node-policy-webhook.svg)](https://github.com/softonic/node-policy-webhook/blob/master/LICENSE)
+[DockerHub]: https://hub.docker.com/r/softonic/node-policy-webhook
+[DockerHub Widget]: https://img.shields.io/docker/pulls/softonic/node-policy-webhook.svg
 
 # node-policy-webhook
 K8s webhook handling profiles for tolerations, nodeSelector and nodeAffinity
