@@ -24,7 +24,7 @@ webhooks:
         apiGroups: [""]
         apiVersions: ["v1"]
         resources: ["pods"]
-    sideEffects: None
+    sideEffects: {{ .Values.webhook.sideEffects }}
     timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
     reinvocationPolicy: {{ .Values.webhook.reinvocationPolicy }}
     failurePolicy: {{ .Values.webhook.failurePolicy }}

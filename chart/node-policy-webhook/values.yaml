@@ -17,6 +17,7 @@ webhook:
   failurePolicy: Ignore
   timeoutSeconds: 5
   reinvocationPolicy: Never
+  sideEffects: None
 
 # Secret containing webhook's cert name
 certs:
