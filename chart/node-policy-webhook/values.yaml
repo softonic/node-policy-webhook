@@ -21,6 +21,11 @@ certs:
   # Key key.pem
   key: ""
 
+
+# Additional Args to command
+additionalArgs:
+  - -v=2
+
 # Cluster's CA bundle
 caBundle: ""
 
