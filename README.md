@@ -7,8 +7,8 @@
 # node-policy-webhook
 K8s webhook handling profiles for tolerations, nodeSelector and nodeAffinity
 
-
-# Quick Start
+# Quick Start
+----------------------------
 
 ## Deployment
 
@@ -90,7 +90,7 @@ make dev
 
 
 # Motivation
-
+----------------------------
 
 The goal of Node Policy Webhook is to reduce Kubernetes manifests complexity by 
 moving the logic behind the scheduling ( when assigning pods to nodes ) 
