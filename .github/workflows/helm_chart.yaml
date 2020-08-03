@@ -7,7 +7,7 @@ on:
     branches:
       - master
     paths:
-      - 'chart/*'
+      - 'chart/**'
 
 jobs:
   build:
