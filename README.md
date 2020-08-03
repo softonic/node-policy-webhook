@@ -8,11 +8,14 @@
 K8s webhook handling profiles for tolerations, nodeSelector and nodeAffinity
 
 
-## DEVEL ENVIRONMENT
+# Quick Start
 
-### Requirements
+## Deployment
 
-Install kind
+
+### Install k8s platform
+
+In this example we will use kind, but you can use whatever k8s platform you are comfortable with
 
 ```bash
 curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.8.1/kind-$\(uname\)-amd64
@@ -20,14 +23,70 @@ mv kind-darwin-amd64 /usr/local/bin/kind
 kind create cluster
 ```
 
+### Deploy using kubectl 
+
+
+Set the variables 
+
+```bash
+VERSION ?= 0.1.1
+REPOSITORY ?= softonic/node-policy-webhook
+```
+
+
+```bash
+make deploy
+```
+
+
+### Deploy using Helm
+
+
+Set the variables
+
+```Makefile
+VERSION ?= 0.1.1
+REPOSITORY ?= softonic/node-policy-webhook
+```
+
+```bash
+make helm-deploy
+```
+
+Now you can run a pod to test it
+
+## Create a NodePolicyProfile
+
+The resource has 3 fields, nodeSelector, tolerations and nodeAffinity
+You can try the repository's sample one.
+
+```bash
+k apply -f samples/nodepolicyprofile.yaml
+```
+
+## Test the profile
+
+Add the profile annotation to your pods, and the mutating webhook will take place
+
+Below you can see an extract of a deployment manifest
+
+```
+...
+  template:
+    metadata:
+      annotations:
+        nodepolicy.softonic.io/profile: "test"
+...
+```
+
+
+## DEVEL ENVIRONMENT
+
 Compile the code and deploy the needed resources
 
 ```bash
 make dev
-make deploy
 ```
-
-Now you can run a pod to test it
 
 
 # Motivation
