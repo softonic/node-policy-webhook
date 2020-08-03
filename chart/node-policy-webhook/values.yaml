@@ -16,6 +16,7 @@ fullnameOverride: ""
 webhook:
   failurePolicy: Ignore
   timeoutSeconds: 5
+  reinvocationPolicy: Never
 
 # Secret containing webhook's cert name
 certs:

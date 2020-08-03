@@ -26,5 +26,5 @@ webhooks:
         resources: ["pods"]
     sideEffects: None
     timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
-    reinvocationPolicy: Never
+    reinvocationPolicy: {{ .Values.webhook.reinvocationPolicy }}
     failurePolicy: {{ .Values.webhook.failurePolicy }}
