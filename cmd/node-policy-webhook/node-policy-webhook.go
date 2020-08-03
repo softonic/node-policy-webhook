@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/softonic/node-policy-webhook/pkg/admission"
 	h "github.com/softonic/node-policy-webhook/pkg/http"
@@ -12,7 +13,6 @@ import (
 	"k8s.io/klog"
 	"net/http"
 	"os"
-	"flag"
 )
 
 type params struct {
@@ -34,10 +34,10 @@ func init() {
 func main() {
 	var params params
 
-    if len(os.Args) < 2 {
+	if len(os.Args) < 2 {
 		klog.Fatalf("Minimum arguments are 2")
-        os.Exit(1)
-    }
+		os.Exit(1)
+	}
 
 	flag.StringVar(&params.certificate, "tls-cert", "bar", "a string var")
 	flag.StringVar(&params.privateKey, "tls-key", "bar", "a string var")
