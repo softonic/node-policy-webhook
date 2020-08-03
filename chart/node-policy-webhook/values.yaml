@@ -22,8 +22,8 @@ certs:
   key: ""
 
 
-# Additional Args to command
-additionalArgs:
+# Add this argument to deployment's command
+verbosity:
   - -v=2
 
 # Cluster's CA bundle

@@ -27,8 +27,8 @@ spec:
           args:
             - --tls-cert={{ .Values.certs.mountPath }}/cert.pem
             - --tls-key={{ .Values.certs.mountPath }}/key.pem
-{{- if .Values.additionalArgs }}
-{{ toYaml .Values.additionalArgs | indent 12 }}
+{{- if .Values.verbosity }}
+{{ toYaml .Values.verbosity | indent 12 }}
 {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
