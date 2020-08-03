@@ -32,6 +32,7 @@ VERSION ?= 0.1.1
 REPOSITORY ?= softonic/node-policy-webhook
 ```
 
+in the Makefile. Fill the repository ( softonic ), and the image tag 
 
 ```bash
 make deploy
@@ -47,6 +48,8 @@ Set the variables
 VERSION ?= 0.1.1
 REPOSITORY ?= softonic/node-policy-webhook
 ```
+
+in the Makefile. Fill the repository ( softonic ), and the image tag
 
 ```bash
 make helm-deploy
