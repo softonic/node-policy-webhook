@@ -103,6 +103,6 @@ Assigning pods to nodes:
 # Internals
 
 
-* [Dynamic Webhooks](docs/internal.md])
+* [Dynamic Webhooks](docs/internals.md])
 * [Our Webhook](docs/webhook.md)
 * [Makefile - Build and Deploy](docs/makefile.md)
