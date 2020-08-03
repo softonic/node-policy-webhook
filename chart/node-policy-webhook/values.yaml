@@ -22,9 +22,8 @@ certs:
   key: ""
 
 
-# Add this argument to deployment's command
-verbosity:
-  - -v=2
+# LogLevel passed as an argument
+verbosity: 2
 
 # Cluster's CA bundle
 caBundle: ""
