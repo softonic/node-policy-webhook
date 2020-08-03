@@ -25,6 +25,6 @@ webhooks:
         apiVersions: ["v1"]
         resources: ["pods"]
     sideEffects: None
-    timeoutSeconds: 5
+    timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
     reinvocationPolicy: Never
-    failurePolicy: Ignore
+    failurePolicy: {{ .Values.webhook.failurePolicy }}

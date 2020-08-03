@@ -13,6 +13,10 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+webhook:
+  failurePolicy: Ignore
+  timeoutSeconds: 5
+
 # Secret containing webhook's cert name
 certs:
   mountPath: /etc/webhook/certs
