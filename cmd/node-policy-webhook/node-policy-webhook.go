@@ -4,30 +4,22 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"net/http"
-	"os"
-	"path"
-
-
-	"github.com/golang/glog"
 	"github.com/softonic/node-policy-webhook/pkg/admission"
 	h "github.com/softonic/node-policy-webhook/pkg/http"
 	"github.com/softonic/node-policy-webhook/pkg/version"
-	"github.com/spf13/cobra"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
-
-	goflag "flag"
-	
-
-	"github.com/spf13/pflag"
+	"net/http"
+	"os"
+	"flag"
 )
 
 type params struct {
 	version     bool
 	certificate string
 	privateKey  string
+	LogLevel    int
 }
 
 const DEFAULT_BIND_ADDRESS = ":8443"
@@ -36,46 +28,28 @@ var handler *h.HttpHandler
 
 func init() {
 	handler = getHttpHandler()
+	klog.InitFlags(nil)
 }
 
 func main() {
 	var params params
 
-	commandName := path.Base(os.Args[0])
-	
-	pflag.CommandLine.AddGoFlag(goflag.CommandLine.Lookup("v"))
+    if len(os.Args) < 2 {
+		klog.Fatalf("Minimum arguments are 2")
+        os.Exit(1)
+    }
 
+	flag.StringVar(&params.certificate, "tls-cert", "bar", "a string var")
+	flag.StringVar(&params.privateKey, "tls-key", "bar", "a string var")
 
-	pflag.CommandLine.Parse([]string{})
+	flag.Parse()
 
-	rootCmd := &cobra.Command{
-		Use:   commandName,
-		Short: fmt.Sprintf("%v handles node policy profiles in kubernetes", commandName),
-		Run: func(cmd *cobra.Command, args []string) {
-
-			if params.version {
-				fmt.Println("Version:", version.Version)
-			} else {
-				run(&params)
-			}
-		},
+	if params.version {
+		fmt.Println("Version:", version.Version)
+	} else {
+		run(&params)
 	}
 
-
-
-	rootCmd.Flags().BoolVarP(&params.version, "version", "n", false, "print version and exit")
-	rootCmd.Flags().StringVarP(&params.certificate, "tls-cert", "c", "default", "certificate (required)")
-	rootCmd.Flags().StringVarP(&params.privateKey, "tls-key", "p", "default", "privateKey (required)")
-	
-
-
-	rootCmd.MarkFlagRequired("tls-cert")
-	rootCmd.MarkFlagRequired("tls-key")
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
 }
 
 func run(params *params) {
@@ -107,15 +81,15 @@ func run(params *params) {
 	if address == "" {
 		address = DEFAULT_BIND_ADDRESS
 	}
-	glog.V(2).Infof("Starting server, bound at %v", address)
-	glog.Infof("Listening to address %v", address)
+	klog.V(2).Infof("Starting server, bound at %v", address)
+	klog.Infof("Listening to address %v", address)
 	srv := &http.Server{
 		Addr:         address,
 		Handler:      mux,
 		TLSConfig:    cfg,
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 	}
-	glog.Fatalf("Could not start server: %v", srv.ListenAndServeTLS(params.certificate, params.privateKey))
+	klog.Fatalf("Could not start server: %v", srv.ListenAndServeTLS(params.certificate, params.privateKey))
 
 }
 
