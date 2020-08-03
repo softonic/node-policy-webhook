@@ -3,24 +3,23 @@ package main
 import (
 	"crypto/tls"
 	"errors"
+	"flag"
 	"fmt"
-	_ "github.com/golang/glog"
 	"github.com/softonic/node-policy-webhook/pkg/admission"
 	h "github.com/softonic/node-policy-webhook/pkg/http"
 	"github.com/softonic/node-policy-webhook/pkg/version"
-	"github.com/spf13/cobra"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
 	"net/http"
 	"os"
-	"path"
 )
 
 type params struct {
 	version     bool
 	certificate string
 	privateKey  string
+	LogLevel    int
 }
 
 const DEFAULT_BIND_ADDRESS = ":8443"
@@ -29,35 +28,28 @@ var handler *h.HttpHandler
 
 func init() {
 	handler = getHttpHandler()
+	klog.InitFlags(nil)
 }
 
 func main() {
 	var params params
 
-	commandName := path.Base(os.Args[0])
-
-	rootCmd := &cobra.Command{
-		Use:   commandName,
-		Short: fmt.Sprintf("%v handles node policy profiles in kubernetes", commandName),
-		Run: func(cmd *cobra.Command, args []string) {
-			if params.version {
-				fmt.Println("Version:", version.Version)
-			} else {
-				run(&params)
-			}
-		},
-	}
-	rootCmd.Flags().BoolVarP(&params.version, "version", "v", false, "print version and exit")
-	rootCmd.Flags().StringVarP(&params.certificate, "tls-cert", "c", "default", "certificate (required)")
-	rootCmd.Flags().StringVarP(&params.privateKey, "tls-key", "p", "default", "privateKey (required)")
-
-	rootCmd.MarkFlagRequired("tls-cert")
-	rootCmd.MarkFlagRequired("tls-key")
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	if len(os.Args) < 2 {
+		klog.Fatalf("Minimum arguments are 2")
 		os.Exit(1)
 	}
+
+	flag.StringVar(&params.certificate, "tls-cert", "bar", "a string var")
+	flag.StringVar(&params.privateKey, "tls-key", "bar", "a string var")
+
+	flag.Parse()
+
+	if params.version {
+		fmt.Println("Version:", version.Version)
+	} else {
+		run(&params)
+	}
+
 }
 
 func run(params *params) {
@@ -89,7 +81,7 @@ func run(params *params) {
 	if address == "" {
 		address = DEFAULT_BIND_ADDRESS
 	}
-	klog.V(0).Infof("Starting server, bound at %v", address)
+	klog.V(2).Infof("Starting server, bound at %v", address)
 	klog.Infof("Listening to address %v", address)
 	srv := &http.Server{
 		Addr:         address,

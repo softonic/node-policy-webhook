@@ -21,6 +21,10 @@ certs:
   # Key key.pem
   key: ""
 
+
+# LogLevel passed as an argument
+verbosity: 2
+
 # Cluster's CA bundle
 caBundle: ""
 
