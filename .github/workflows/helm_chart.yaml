@@ -10,7 +10,7 @@ on:
       - 'chart/**'
 
 jobs:
-  build:
+  push-chart:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
