@@ -23,7 +23,7 @@ mv kind-darwin-amd64 /usr/local/bin/kind
 kind create cluster
 ```
 
-### Deploy using kubectl 
+### Deploy using kubectl 
 
 
 Set the variables 
@@ -39,7 +39,7 @@ make deploy
 ```
 
 
-### Deploy using Helm
+### Deploy using Helm
 
 
 Set the variables
