@@ -102,7 +102,7 @@ Assigning pods to nodes:
 
 # Internals
 
-* Dynamic Webhooks | [docs/internals.md][PlDb]
-* Our Webhook | [docs/webhook.md][PlDb]
-* Makefile - Build and Deploy | [docs/makefile.md][PlDb]
 
+* [Dynamic Webhooks](docs/internal.md])
+* [Our Webhook](docs/webhook.md)
+* [Makefile - Build and Deploy](docs/makefile.md)
