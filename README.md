@@ -9,7 +9,6 @@ K8s webhook handling profiles for tolerations, nodeSelector and nodeAffinity
 
 # Quick Start
 
-
 Steps to got webhook working
 
 - Deploy the webhook ( kubectl or helm )
@@ -18,51 +17,32 @@ Steps to got webhook working
 
 ## Deployment
 
+### Requirements
 
-### Install k8s platform
-
-In this example we will use kind, but you can use whatever k8s platform you are comfortable with
-
-```bash
-curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.8.1/kind-$\(uname\)-amd64
-mv kind-darwin-amd64 /usr/local/bin/kind
-kind create cluster
-```
+In this example we assume you already have a k8s cluster running
 
 ### Deploy using kubectl 
 
-
-Set the variables 
-
 ```bash
-VERSION ?= 0.1.1
-REPOSITORY ?= softonic/node-policy-webhook
+$ make deploy
 ```
 
-in the Makefile. Fill the repository ( softonic ), and the image tag 
+You can find public image in the softonic/node-policy-webhook docker hub repository.
+More details about the deployment can be found here.
+* [Makefile - Build and Deploy](docs/makefile.md)
 
-```bash
-make deploy
-```
 
 
 ### Deploy using Helm
 
 
-Set the variables
-
-```Makefile
-VERSION ?= 0.1.1
-REPOSITORY ?= softonic/node-policy-webhook
-```
-
-in the Makefile. Fill the repository ( softonic ), and the image tag
-
 ```bash
-make helm-deploy
+$ make helm-deploy
 ```
 
-Now you can run a pod to test it
+More details about the deployment can be found here.
+* [Makefile - Build and Deploy](docs/makefile.md)
+
 
 ## Create a NodePolicyProfile
 
@@ -70,7 +50,7 @@ The resource has 3 fields, nodeSelector, tolerations and nodeAffinity
 You can try the repository's sample one.
 
 ```bash
-k apply -f samples/nodepolicyprofile.yaml
+$ kubectl apply -f samples/nodepolicyprofile.yaml
 ```
 
 ## Test the profile
@@ -84,7 +64,7 @@ Below you can see an extract of a deployment manifest
   template:
     metadata:
       annotations:
-        nodepolicy.softonic.io/profile: "test"
+        nodepolicy.softonic.io/profile: "stateless"
 ...
 ```
 
@@ -94,9 +74,11 @@ Below you can see an extract of a deployment manifest
 Compile the code and deploy the needed resources
 
 ```bash
-make dev
+$ make dev
 ```
 
+More details about the development process can be found here.
+* [Makefile - Build and Deploy](docs/makefile.md)
 
 # Motivation
 
