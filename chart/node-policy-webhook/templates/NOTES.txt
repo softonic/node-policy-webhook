@@ -1,1 +1,1 @@
-Node Policy Webhook Release {{ .Release.Name }} installed in Namespace {{ .Release.Namespace }}
+Node Policy Webhook {{ .Chart.Name }}-{{ .Chart.Version }} Release {{ .Release.Name }} installed in Namespace {{ .Release.Namespace }}.
