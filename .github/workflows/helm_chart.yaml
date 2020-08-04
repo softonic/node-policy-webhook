@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses:  rccrdpccl/helm-push-action@v3
+    - uses: goodsmileduck/helm-push-action@v3
       env:
         SOURCE_DIR: 'chart'
         CHART_FOLDER: 'node-policy-webhook'
