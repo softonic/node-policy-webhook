@@ -9,6 +9,13 @@ K8s webhook handling profiles for tolerations, nodeSelector and nodeAffinity
 
 # Quick Start
 
+
+Steps to got webhook working
+
+- Deploy the webhook ( kubectl or helm )
+- Deploy NodePolicyProfile object
+- Deploy with the annotation ( below you can find it )  and watch if the pod is scheduled where was meant to
+
 ## Deployment
 
 
@@ -82,7 +89,7 @@ Below you can see an extract of a deployment manifest
 ```
 
 
-## DEVEL ENVIRONMENT
+# DEVEL ENVIRONMENT
 
 Compile the code and deploy the needed resources
 
