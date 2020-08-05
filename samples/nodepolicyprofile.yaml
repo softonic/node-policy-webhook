@@ -1,7 +1,7 @@
 apiVersion: noodepolicies.softonic.io/v1alpha1
 kind: NodePolicyProfile
 metadata:
-  name: test
+  name: stateless
 spec:
   nodeSelector:
     type: "stateless"

@@ -107,7 +107,6 @@ func TestCreatePatchWhenNodeSelectorDifferentKey(t *testing.T) {
 
 func TestCreatePatchWhenNodeAffinity(t *testing.T) {
 
-
 	nodeSelectorPod := v1.NodeSelector{
 		NodeSelectorTerms: []v1.NodeSelectorTerm{
 			{
@@ -131,7 +130,6 @@ func TestCreatePatchWhenNodeAffinity(t *testing.T) {
 	}
 
 	pod := getPodWithAffinity(Affinity)
-
 
 	nodeSelector := v1.NodeSelector{
 		NodeSelectorTerms: []v1.NodeSelectorTerm{
@@ -231,11 +229,11 @@ func TestCreatePatchWithPodAntiAffinityAndProfileNoAffinity(t *testing.T) {
 		v1.WeightedPodAffinityTerm{
 			Weight: 100,
 			PodAffinityTerm: v1.PodAffinityTerm{
-			LabelSelector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{
-					"app": "foo",
-					"component": "bar",
-					"release": "test",
+				LabelSelector: &metav1.LabelSelector{
+					MatchLabels: map[string]string{
+						"app":       "foo",
+						"component": "bar",
+						"release":   "test",
 					},
 				},
 				TopologyKey: "kubernetes.io/hostname",
@@ -247,9 +245,7 @@ func TestCreatePatchWithPodAntiAffinityAndProfileNoAffinity(t *testing.T) {
 		PreferredDuringSchedulingIgnoredDuringExecution: WeightedPodAffinityTerm,
 	}
 
-
 	affinity := v1.Affinity{}
-	
 
 	expectedAffinity := v1.Affinity{
 		PodAntiAffinity: &podAntiAffinity,
@@ -306,7 +302,6 @@ func TestCreatePatchWithPodAntiAffinity(t *testing.T) {
 	}
 	expectPatch(t, expectedPatch, patch)
 }
-
 
 func getNodePolicyProfileWithNodeSelector(nodeSelector map[string]string) *v1alpha1.NodePolicyProfile {
 	nodePolicyProfile := &v1alpha1.NodePolicyProfile{
