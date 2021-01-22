@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcpauthpolicyprofile-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: gcpauthpolicyprofile-controller
+      app.kubernetes.io/name: gcpauthpolicyprofile-controller
+  template:
+    metadata:
+      labels:
+        app: admission-webhook-controller
+        instance: gcpauthpolicyprofile
+        app.kubernetes.io/instance: gcpauthpolicyprofile-controller
+        app.kubernetes.io/name: gcpauthpolicyprofile-controller
+    spec:
+      containers:
+      - args:
+        - --kind=gcpauthpolicyprofile
+        image: admission-webhook-controller:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /
+            port: webhook-server
+            scheme: HTTPS
+        name: gcpauthpolicyprofile-controller
+        ports:
+        - containerPort: 9443
+          name: webhook-server
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: cert
+          readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /
+            port: webhook-server
+            scheme: HTTPS
+        resources: {}
+        securityContext: {}
+      securityContext: {}
+      serviceAccountName: gcpauthpolicyprofile-controller
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: gcpauthpolicyprofile-controller-tls

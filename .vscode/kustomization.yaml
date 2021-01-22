@@ -1,0 +1,23 @@
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+namespace: admission-webhooks
+commonLabels:
+  app.kubernetes.io/name: admission-webhook-controller
+namespace: policies
+resources:
+  - ../deploy
+  - policies-ns.yaml
+  - devpod-cm.yaml
+  - devpod-workspace-persistentvolumeclaim.yaml
+  - gcpauthpolicyprofile-devpod-deploy.yaml
+  - nodepolicyprofile-devpod-deploy.yaml
+patchesStrategicMerge:
+  - disable-gcpauthpolicyprofile-controller.yaml
+  - disable-nodepolicyprofile-controller.yaml
+images:
+  - name: golang
+    newName: pop-os.home:5000/library/golang
+    newTag: 1.14-buster-supervisor
+  - name: admission-webhook-controller
+    newName: pop-os.home:5000/library/admission-webhook-controller
+    newTag: latest

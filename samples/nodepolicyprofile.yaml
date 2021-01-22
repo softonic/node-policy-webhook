@@ -1,4 +1,4 @@
-apiVersion: noodepolicies.softonic.io/v1alpha1
+apiVersion: nodepolicy.nuxeo.io/v1alpha1
 kind: NodePolicyProfile
 metadata:
   name: stateless

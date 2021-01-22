@@ -1,20 +1,21 @@
-module github.com/softonic/node-policy-webhook
+module github.com/nxmatic/admission-webhook-controller
 
-go 1.14
+go 1.15
 
 require (
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
-	github.com/jessevdk/go-flags v1.4.0 // indirect
-	github.com/spf13/cobra v1.0.0
+	github.com/ghodss/yaml v1.0.0
+	github.com/go-logr/logr v0.4.0
+	github.com/google/gofuzz v1.2.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5
-	github.com/uber/go-torch v0.0.0-20181107071353-86f327cc820e // indirect
-	github.com/yuin/goldmark v1.2.1 // indirect
-	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
-	golang.org/x/tools v0.0.0-20200729194436-6467de6f59a7 // indirect
-	gotest.tools v2.2.0+incompatible
-	k8s.io/api v0.18.2
-	k8s.io/apimachinery v0.18.5
-	k8s.io/client-go v0.18.2
-	k8s.io/klog v1.0.0
-	sigs.k8s.io/controller-runtime v0.6.0
+	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	k8s.io/api v0.20.2
+	k8s.io/apimachinery v0.20.2
+	k8s.io/client-go v12.0.0+incompatible
+	sigs.k8s.io/controller-runtime v0.8.1
 )
+
+replace k8s.io/client-go => k8s.io/client-go v0.20.2

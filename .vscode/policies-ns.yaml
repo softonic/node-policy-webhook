@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: policies
+  annotations:
+    nodepolicy.nuxeo.io/profile: stateless
+    gcpauthpolicy.nuxeo.io/profile: pfouh
+spec:
+  finalizers:
+  - kubernetes
+

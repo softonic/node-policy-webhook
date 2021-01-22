@@ -1,0 +1,7 @@
+apiVersion: gcpauthpolicy.nuxeo.io/v1alpha1
+kind: GCPAuthPolicyProfile
+metadata:
+  name: pfouh
+spec:
+  namespace: policies
+  name: pfouh

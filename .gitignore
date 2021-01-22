@@ -2,5 +2,9 @@ ssl/csr.conf
 ssl/*.csr
 ssl/*.key
 ssl/*.pem
-manifest.yaml
+/vendor
+/manifest.yaml
 chart/node-policy-webhook/secret.values.yaml
+admission-webhook-controller
+*~
+/.local

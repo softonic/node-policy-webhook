@@ -1,0 +1,22 @@
+<configuration xmlns="http://jgitver.github.io/maven/configuration/1.1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://jgitver.github.io/maven/configuration/1.1.0 https://jgitver.github.io/maven/configuration/jgitver-configuration-v1_1_0.xsd">
+  <autoIncrementPatch>false</autoIncrementPatch>
+  <strategy>PATTERN</strategy>
+  <versionPattern>${v}-${meta.COMMIT_DISTANCE}-${meta.GIT_SHA1_8}-${meta.QUALIFIED_BRANCH_NAME}</versionPattern>
+  <tagVersionPattern>${v}</tagVersionPattern>
+  <regexVersionTag>v?(\d+(?:\.\d+){0,2})(?:-[a-zA-Z0-9]+)*</regexVersionTag>
+  <policy>MAX</policy>
+  <useDirty>false</useDirty>
+  <useGitCommitId>true</useGitCommitId>
+  <useCommitDistance>true</useCommitDistance>
+  <useDefaultBranchingPolicy>false</useDefaultBranchingPolicy>
+  <branchPolicies>
+    <branchPolicy>
+      <pattern>(.*)</pattern>
+      <transformations>
+        <transformation>IDENTITY</transformation>
+      </transformations>
+    </branchPolicy>
+  </branchPolicies>
+</configuration>

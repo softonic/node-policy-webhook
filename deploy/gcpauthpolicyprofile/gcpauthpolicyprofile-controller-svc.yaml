@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gcpauthpolicyprofile-controller
+spec:
+  ports:
+  - name: webhook-server
+    port: 443
+    protocol: TCP
+    targetPort: webhook-server
+  selector:
+    app.kubernetes.io/instance: admission-webhook-controller
+    app.kubernetes.io/name: admission-webhook-controller
+  type: ClusterIP

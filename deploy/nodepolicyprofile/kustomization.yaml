@@ -1,0 +1,14 @@
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+commonLabels:
+  app.kubernetes.io/instance: nodepolicyprofile
+resources:
+- nodepolicyprofile-controller-certificate.yaml
+- nodepolicyprofile-controller-clusterrole.yaml
+- nodepolicyprofile-controller-crb.yaml
+- nodepolicyprofile-controller-deploy.yaml
+- nodepolicyprofile-controller-sa.yaml
+- nodepolicyprofile-controller-svc.yaml
+- nodepolicyprofile-controller-tls-secret.yaml
+- nodepolicyprofile-mutwebhookcfg.yaml
+- nodepolicyprofiles.nodepolicy.nuxeo.io-crd.yaml

@@ -1,20 +1,39 @@
-BIN := node-policy-webhook
+BIN := admission-webhook-controller
 CRD_OPTIONS ?= "crd:trivialVersions=true"
-PKG := github.com/softonic/node-policy-webhook
-VERSION ?= 0.1.6-dev
+PKG := github.com/nxmatic/admission-webhook-server
 ARCH ?= amd64
-APP ?= node-policy-webhook
+APP ?= admission-webhook-controller
 NAMESPACE ?= default
-RELEASE_NAME ?= node-policy-webhook
-KO_DOCKER_REPO = registry.softonic.io/node-policy-webhook
-REPOSITORY ?= node-policy-webhook
+RELEASE_NAME ?= admission-webhook-controller
+KO_DOCKER_REPO = registry.softonic.io/admission-webhook-controller
+REPOSITORY ?= gcr.io/build-jx-prod/library
+VERSION ?= "$(shell git describe --tags | sed 's/^v//')"
+VERSION_PKG ?= $(PKG)/pkg/version
+VERSION_DATE ?= $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+LD_FLAGS := -X $(VERSION_PKG).Version=$(VERSION) -X $(VERSION_PKG).buildDate=$(VERSION_DATE)
 
 IMAGE := $(BIN)
 
 BUILD_IMAGE ?= golang:1.14-buster
 
+controller-gen.bin := $(shell which controller-gen)
+controller-gen.bin := $(if $(controller-gen.bin),$(controller-gen.bin),$(GOPATH)/bin/controller-gen)
 
-deploy-prod: export IMAGE_GEN = "github.com/softonic/node-policy-webhook/cmd/node-policy-webhook"
+jx.bin := $(shell which jx)
+jx.bin := $(if $(jx.bin),$(jx.bin),/usr/local/bin/jx)
+
+kustomize.bin := $(shell which kustomize)
+kustomize.bin := $(if $(kustomize.bin),$(kustomize.bin),/usr/local/bin/kustomize)
+
+kubectl.bin := $(shell which kubectl)
+kubectl.bin := $(if $(kubectl.bin),$(kubectl.bin),/usr/local/bin/kubectl)
+
+kubectl-neat.bin := $(shell which kubectl-neat)
+kubectl-neat.bin := $(if $(kubectl-neat.bin),$(kubectl-neat.bin),/usr/local/bin/kubectl-neat)
+
+.ONESHELL:
+
+deploy-prod: export IMAGE_GEN = "github.com/softonic/admission-webhook-controller/cmd/admission-webhook-controller"
 
 deploy:  export IMAGE_GEN = $(APP):$(VERSION)
 
@@ -25,16 +44,15 @@ all: dev
 .PHONY: build
 build: generate
 	go mod download
-	GOARCH=${ARCH} go build -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./cmd/node-policy-webhook/.../
+	GOARCH=${ARCH} go build -ldflags "$(LD_FLAGS)"
 
 .PHONY: test
 test:
-	GOARCH=${ARCH} go test -v -ldflags "-X ${PKG}/pkg/version.Version=${VERSION}" ./...
+	GOARCH=${ARCH} go test -v -ldflags "$(LD_FLAGS)" ./...
 
 .PHONY: image
 image:
-	docker build -t $(IMAGE):$(VERSION) -f Dockerfile .
-	docker tag $(IMAGE):$(VERSION) $(IMAGE):latest
+	docker build -t $(IMAGE):latest -f Dockerfile .
 
 .PHONY: dev
 dev: image
@@ -46,39 +64,59 @@ undeploy:
 
 .PHONY: deploy
 deploy: manifest
-	kubectl apply -f manifest.yaml
+	kustomize build deploy | kubectl apply -f -
 
 .PHONY: up
 up: image undeploy deploy
 
+docker-%: tags := $(REPOSITORY)/$(IMAGE):latest $(REPOSITORY)/$(IMAGE):$(VERSION)
+
+.PHONY: docker-tag
+docker-tag: script=$(docker-tag.script)
+docker-tag:
+	$(foreach tag,$(tags),$(script))
+
+define docker-tag.script =
+docker tag $(IMAGE):latest $(tag)
+$(newline)
+endef
+
 .PHONY: docker-push
+docker-push: script=$(docker-push.script)
 docker-push:
-	docker push $(IMAGE):$(VERSION)
-	docker push $(IMAGE):latest
+	$(foreach tag,$(tags),$(script))
+
+define docker-push.script =
+docker push $(tag)
+$(newline)
+endef
 
 .PHONY: version
 version:
 	@echo $(VERSION)
 
-.PHONY: secret-values
-secret-values:
-	./hack/generate_helm_cert_secrets $(APP) $(NAMESPACE)
+null  :=
+space := $(null) #
+comma := ,
 
-.PHONY: manifest
-manifest: controller-gen helm-chart secret-values
-	docker run --rm -v $(PWD):/app -w /app/ alpine/helm:3.2.3 template --release-name $(RELEASE_NAME) --set "image.tag=$(VERSION)" --set "image.repository=$(REPOSITORY)"  -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook > manifest.yaml
+define newline :=
 
-.PHONY: helm-chart
-helm-chart: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) webhook paths="./..." output:crd:artifacts:config=chart/node-policy-webhook/templates
-
-.PHONY: helm-deploy
-helm-deploy: helm-chart secret-values
-	helm upgrade --install $(RELEASE_NAME) --namespace $(NAMESPACE) --set "image.tag=$(VERSION)" -f chart/node-policy-webhook/values.yaml -f chart/node-policy-webhook/secret.values.yaml chart/node-policy-webhook
+endef
 
 .PHONY: generate
-generate: controller-gen
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+generate: packages := gcpauthpolicyprofile nodepolicyprofile
+generate: script=$(generate.script)
+generate: $(controller-gen.bin) $(jx.bin) $(kustomize.bin)
+generate:
+	$(foreach package,$(packages),$(script))
+
+define generate.script =
+	$(controller-gen.bin) object paths=./apis/$(package)/...
+	$(controller-gen.bin) crd paths=./apis/$(package)/... output:crd:artifacts:config=deploy/$(package)
+	$(controller-gen.bin) rbac:roleName=$(package)-controller paths=./apis/$(package)/... output:rbac:artifacts:config=deploy/$(package)
+	$(jx.bin) gitops rename --dir=deploy/$(package)
+$(newline)
+endef
 
 # Run go fmt against code
 fmt:
@@ -88,20 +126,37 @@ fmt:
 vet:
 	go vet ./...
 
-# find or download controller-gen
-# download controller-gen if necessary
-.PHONY: controller-gen
-controller-gen:
-ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5 ;\
-	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
-	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
+$(GOPATH)/bin/controller-gen:
+	tmpdir=$$(mktemp -d)
+	cd $$tmpdir
+	go mod init tmp
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
+	rm -rf $$tmpdir
+
+ifeq ('$(findstring ;,$(PATH))',';')
+os := windows
 else
-CONTROLLER_GEN=$(shell which controller-gen)
+os := $(shell uname 2>/dev/null || echo Unknown)
+os := $(patsubst CYGWIN%,ygwin,$(os))
+os := $(patsubst MSYS%,MSYS,$(os))
+os := $(patsubst MINGW%,MSYS,$(os))
+os := $(shell echo $(os) | tr '[:upper:]' '[:lower:]')
 endif
+
+/usr/local/bin/jx:
+	curl -sL https://github.com/jenkins-x/jx-cli/releases/download/v3.1.211/jx-cli-$(os)-amd64.tar.gz| tar xvz -C /usr/local/bin -f - jx
+	chmod +x $(@)
+
+$(HOME)/.config/kustomize/plugin /usr/local/bin/kustomize:
+	curl -sL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.9.2/kustomize_v3.9.2_$(os)_amd64.tar.gz | tar xvz -C /usr/local/bin -f - kustomize
+	chmod +x $(@)
+	mkdir -p $(HOME)/.config/kustomize/plugin
+
+/usr/local/bin/kubectl: version := $(shell curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+/usr/local/bin/kubectl:
+	curl -o $(@) -L https://storage.googleapis.com/kubernetes-release/release/$(version)/bin/$(os)/amd64/kubectl
+	chmod +x $(@)
+
+/usr/local/bin/kubectl-neat:
+ 	curl -sL https://github.com/itaysk/kubectl-neat/releases/download/v2.0.2/kubectl-neat_$(os).tar.gz | tar xvz -C /usr/local/bin -f - kubectl-neat
+	chmod +x $(@)

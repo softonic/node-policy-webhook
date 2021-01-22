@@ -1,15 +1,15 @@
-FROM golang:1.14-buster AS build
+FROM golang:1.15-buster AS build
 
 ENV GOBIN=$GOPATH/bin
 
-ADD . /src/node-policy-webhook
+ADD . /src/admission-webhook-controller
 
-WORKDIR /src/node-policy-webhook
+WORKDIR /src/admission-webhook-controller
 
 RUN make build
 
 FROM debian:buster-slim
 
-COPY --from=build /src/node-policy-webhook/node-policy-webhook /node-policy-webhook
+COPY --from=build /src/admission-webhook-controller/admission-webhook-controller /admission-webhook-controller
 
-ENTRYPOINT ["/node-policy-webhook"]
+ENTRYPOINT ["/admission-webhook-controller"]

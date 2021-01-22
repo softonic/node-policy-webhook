@@ -1,0 +1,14 @@
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+commonLabels:
+  app.kubernetes.io/instance: gcpauthpolicyprofile
+resources:
+- gcpauthpolicyprofile-controller-certificate.yaml
+- gcpauthpolicyprofile-controller-tls-secret.yaml
+- gcpauthpolicyprofile-controller-clusterrole.yaml
+- gcpauthpolicyprofile-controller-crb.yaml
+- gcpauthpolicyprofile-controller-deploy.yaml
+- gcpauthpolicyprofile-controller-sa.yaml
+- gcpauthpolicyprofile-controller-svc.yaml
+- gcpauthpolicyprofile-mutwebhookcfg.yaml
+- gcpauthpolicyprofiles.gcpauthpolicy.nuxeo.io-crd.yaml

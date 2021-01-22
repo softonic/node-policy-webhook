@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodepolicyprofile-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: nodepolicyprofile-controller
+      app.kubernetes.io/name: nodepolicyprofile-controller
+  template:
+    metadata:
+      labels:
+        app: admission-webhook-controller
+        instance: nodepolicyprofile
+        app.kubernetes.io/instance: nodepolicyprofile-controller
+        app.kubernetes.io/name: nodepolicyprofile-controller
+    spec:
+      containers:
+      - args:
+        - --zap-devel
+        - --kind=nodepolicyprofile
+        env:
+        image: admission-webhook-controller
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /
+            port: webhook-server
+            scheme: HTTPS
+        name: nodepolicyprofile-controller
+        ports:
+        - containerPort: 9443
+          name: webhook-server
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /
+            port: webhook-server
+            scheme: HTTPS
+        resources: {}
+        securityContext: {}
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: cert
+          readOnly: true
+      securityContext: {}
+      serviceAccountName: nodepolicyprofile-controller
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: nodepolicyprofile-controller-tls

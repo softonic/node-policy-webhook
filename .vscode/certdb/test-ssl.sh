@@ -1,0 +1,2 @@
+openssl s_server -cert tls.crt -CAfile ca.crt -WWW -port 12345 -verify_return_error -verify 1&
+echo -e 'GET /test.txt HTTP/1.1\r\n\r\n' |  openssl s_client -cert tls.crt -key tls.key -CAfile ca.crt -connect 127.0.0.1:12345 -quiet
