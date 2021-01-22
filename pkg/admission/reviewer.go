@@ -3,6 +3,7 @@ package admission
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/softonic/node-policy-webhook/pkg/log"
 	"k8s.io/api/admission/v1beta1"
 	v1 "k8s.io/api/core/v1"
@@ -89,7 +90,14 @@ func (r *AdmissionReviewer) admissionAllowedResponse(pod *v1.Pod) *v1beta1.Admis
 func (r *AdmissionReviewer) getProfile(pod *v1.Pod) (string, error) {
 	annotations := pod.ObjectMeta.GetAnnotations()
 	if annotations == nil {
-		annotations = map[string]string{}
+		namespace, err := r.fetcher.GetNamespace(pod.ObjectMeta.Namespace)
+		if err != nil {
+			return "", err
+		}
+		annotations = namespace.ObjectMeta.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
 	}
 
 	if profileName, ok := annotations[PROFILE_ANNOTATION]; ok {
@@ -113,4 +121,8 @@ func (r *AdmissionReviewer) getPod(admissionReview *v1beta1.AdmissionReview) (*v
 		return nil, err
 	}
 	return &pod, nil
+}
+
+func (r *AdmissionReviewer) getNamespace(pod *v1.Pod) (*v1.Namespace, error) {
+	return r.fetcher.GetNamespace(pod.ObjectMeta.Namespace)
 }
