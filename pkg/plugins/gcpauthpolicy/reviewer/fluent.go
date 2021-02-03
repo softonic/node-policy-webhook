@@ -12,6 +12,10 @@ import (
 	spi "github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi/reviewer"
 )
 
+const (
+	ImagePullSecretsFeatureGate FeatureGateField = iota
+)
+
 type (
 	RequestedServiceAccountStage struct {
 		k8s.Interface
@@ -20,6 +24,12 @@ type (
 		GCPAuthPolicyProfile gcpauth_api.GCPAuthPolicyProfile
 	}
 
+	FeatureGateStage struct {
+		*RequestedProfileStage
+		*gcpauth_api.GCPAuthFeatureGate
+	}
+
+	FeatureGateField   int
 	RequestedKindStage struct {
 		*RequestedServiceAccountStage
 	}
@@ -106,6 +116,43 @@ func (s *RequestedProfileStage) SecretIsAvailable() *RequestedProfileStage {
 		s.Fail(errors.New("Policy secret unavailable"))
 	}
 	return s
+}
+
+func (s *RequestedProfileStage) FeatureGate(field FeatureGateField) *FeatureGateStage {
+	if !s.CanContinue() {
+		return &FeatureGateStage{
+			RequestedProfileStage: s,
+			GCPAuthFeatureGate:    nil,
+		}
+	}
+
+	switch field {
+	case ImagePullSecretsFeatureGate:
+		return &FeatureGateStage{
+			RequestedProfileStage: s,
+			GCPAuthFeatureGate:    &s.GCPAuthPolicyProfile.Spec.GCPAuthFeatureGates.ImagePullSecretsInjection}
+	}
+
+	s.Fail(errors.New("should never reach this code"))
+
+	return &FeatureGateStage{
+		RequestedProfileStage: s,
+		GCPAuthFeatureGate:    nil,
+	}
+}
+
+func (s *FeatureGateStage) IsEnabled() *FeatureGateStage {
+	if !s.CanContinue() {
+		return s
+	}
+	if !s.GCPAuthFeatureGate.Enabled {
+		s.Allow(nil)
+	}
+	return s
+}
+
+func (s *FeatureGateStage) End() *RequestedProfileStage {
+	return s.RequestedProfileStage
 }
 
 func (s *RequestedProfileStage) And() *RequestedProfileStage {

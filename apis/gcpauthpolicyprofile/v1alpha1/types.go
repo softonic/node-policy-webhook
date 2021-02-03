@@ -60,9 +60,17 @@ type GCPAuthPolicyProfile struct {
 }
 
 type GCPAuthPolicyProfileSpec struct {
-	GCPAuthDatasource `json:"datasource,omitempty"`
+	GCPAuthDatasource   `json:"datasource,omitempty"`
+	GCPAuthFeatureGates `json:"features,omitempty"`
 }
 
+type GCPAuthFeatureGates struct {
+	ImagePullSecretsInjection GCPAuthFeatureGate `json:"imagePullSecrets,omitempty"`
+}
+
+type GCPAuthFeatureGate struct {
+	Enabled bool `json:"enabled,omitempty"`
+}
 type GCPAuthDatasource struct {
 	GCPAuthSecretDatasource `json:"secret,omitempty"`
 }

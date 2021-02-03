@@ -3,5 +3,10 @@ kind: GCPAuthPolicyProfile
 metadata:
   name: pfouh
 spec:
-  namespace: policies
-  name: pfouh
+  features:
+    imagePullSecrets:
+      enabled: true
+  datasource:
+    secret:
+      namespace: policies
+      name: pfouh
