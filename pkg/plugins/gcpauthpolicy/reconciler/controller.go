@@ -11,6 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
@@ -33,10 +34,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to primary resource GCPAuthPolicyProfile
 	decorator := profileDecorator{handler: &handler.EnqueueRequestForObject{}}
 	profileResource := &source.Kind{
-		Type: &gcpauthpolicy_api.GCPAuthPolicyProfile{
+		Type: &gcpauthpolicy_api.Profile{
 			TypeMeta: meta_api.TypeMeta{
 				APIVersion: gcpauthpolicy_api.SchemeGroupVersion.String(),
-				Kind:       gcpauthpolicy_api.GCPAuthpolicyprofileKind.String(),
+				Kind:       gcpauthpolicy_api.ProfileKind.String(),
 			},
 		},
 	}
@@ -54,7 +55,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			},
 		},
 	}
-	err = c.Watch(secretResource, &enqueueRequestForOwner{})
+	predicate, err := predicate.LabelSelectorPredicate(
+		meta_api.LabelSelector{
+			MatchLabels: map[string]string{
+				gcpauthpolicy_api.WatchKey.String(): "true",
+			}})
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	err = c.Watch(secretResource, &enqueueRequestForOwner{}, predicate)
 	if err != nil {
 		return errors.WithStack(err)
 	}

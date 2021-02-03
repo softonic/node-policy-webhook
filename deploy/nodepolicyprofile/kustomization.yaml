@@ -11,4 +11,4 @@ resources:
 - nodepolicyprofile-controller-svc.yaml
 - nodepolicyprofile-controller-tls-secret.yaml
 - nodepolicyprofile-mutwebhookcfg.yaml
-- nodepolicyprofiles.nodepolicy.nuxeo.io-crd.yaml
+- profiles.nodepolicy.nuxeo.io-crd.yaml

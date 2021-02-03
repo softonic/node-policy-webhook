@@ -4,12 +4,9 @@ import (
 	"context"
 	"time"
 
-	core_api "k8s.io/api/core/v1"
-	errors_api "k8s.io/apimachinery/pkg/api/errors"
-
-	"github.com/nuxeo/k8s-policy-controller/apis/gcpauthpolicyprofile/v1alpha1"
 	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/gcpauthpolicy/k8s"
-	k8s_spi "github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi/k8s"
+
+	errors_api "k8s.io/apimachinery/pkg/api/errors"
 
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -18,13 +15,10 @@ type (
 	reconciler struct {
 		*k8s.Interface
 	}
-	replicator struct {
-		k8s_spi.Replicator
-		k8s_spi.ReplicatorSource
-	}
 )
 
 var (
+	end            reconcile.Result = reconcile.Result{}
 	requeueOnError reconcile.Result = reconcile.Result{RequeueAfter: 5 * time.Minute}
 )
 
@@ -34,29 +28,25 @@ func (r *reconciler) Reconcile(ctx context.Context, o reconcile.Request) (reconc
 		if !errors_api.IsNotFound(err) {
 			return requeueOnError, err
 		}
-		return r.deleteHandler(profile)
+		return end, nil
 	}
 	return r.updateHandler(profile)
 }
 
-func (r *reconciler) deleteHandler(profile *v1alpha1.GCPAuthPolicyProfile) (reconcile.Result, error) {
-	err := r.Interface.DeleteSecrets(profile)
+func (r *reconciler) deleteHandler(name string) (reconcile.Result, error) {
+	err := r.DeleteImagePullSecret(name)
 	if err != nil {
+		if errors_api.IsNotFound(err) {
+			return end, nil
+		}
 		return requeueOnError, err
 	}
-	return reconcile.Result{}, nil
+	return end, nil
 }
 
-func (r *reconciler) updateHandler(profile *v1alpha1.GCPAuthPolicyProfile) (reconcile.Result, error) {
-	iterator, err := r.Interface.ListSecrets(profile)
-	if err != nil {
-		return reconcile.Result{}, err
+func (r *reconciler) updateHandler(profile *k8s.Profile) (reconcile.Result, error) {
+	if err := r.UpdateImagePullSecret(profile); err != nil {
+		return requeueOnError, err
 	}
-	replicator := r.NewReplicator()
-	iterator.Apply(func(secret *core_api.Secret) error {
-		_, err := replicator.UpdateReplicatedSecret(secret, &profile.Spec)
-		return err
-	})
-
-	return reconcile.Result{}, nil
+	return end, nil
 }

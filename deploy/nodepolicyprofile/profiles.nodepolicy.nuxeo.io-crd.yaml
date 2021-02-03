@@ -6,18 +6,18 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: nodepolicyprofiles.nodepolicy.nuxeo.io
+  name: profiles.nodepolicy.nuxeo.io
 spec:
   group: nodepolicy.nuxeo.io
   names:
-    kind: NodePolicyProfile
-    listKind: NodePolicyProfileList
-    plural: nodepolicyprofiles
-    singular: nodepolicyprofile
+    kind: Profile
+    listKind: ProfileList
+    plural: profiles
+    singular: profile
   scope: Cluster
   validation:
     openAPIV3Schema:
-      description: NodePolicyProfile is the Schema for the nodepolicyprofiles API
+      description: Profile is the Schema for the nodepolicyprofiles API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -32,7 +32,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: NodePolicyProfileSpec defines the desired state of NodePolicyProfile
+          description: ProfileSpec defines the desired state of NodePolicyProfile
           properties:
             nodeAffinity:
               description: Node affinity is a group of node affinity scheduling rules.
@@ -271,7 +271,7 @@ spec:
               type: array
           type: object
         status:
-          description: NodePolicyProfileStatus defines the observed state of NodePolicyProfile
+          description: ProfileStatus defines the observed state of NodePolicyProfile
           type: object
       type: object
   version: v1alpha1

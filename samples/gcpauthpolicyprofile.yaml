@@ -6,7 +6,10 @@ spec:
   features:
     imagePullSecrets:
       enabled: true
+  storage:
+    namespace:
+      name: policies
   datasource:
     secret:
       namespace: policies
-      name: pfouh
+      name: datasource

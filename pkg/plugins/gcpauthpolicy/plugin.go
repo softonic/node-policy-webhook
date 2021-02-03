@@ -56,8 +56,10 @@ func (h *serviceaccountHook) Review(s *reviewer_spi.GivenStage) *reviewer_spi.Wh
 		The().RequestedObject(s).And().
 		The().RequestedKind().IsAServiceAccount().End().
 		The().RequestedProfile().
-			Exists().And().
-			The().FeatureGate("ImagePullSecrets").IsEnabled().End().
-			The().SecretIsAvailable().End()
-		.End()
+		Exists().And().
+		The().FeatureGate(reviewer.ImagePullSecretsFeatureGate).
+		IsEnabled().And().
+		The().SecretIsAvailable().
+		End().
+		End().End()
 }

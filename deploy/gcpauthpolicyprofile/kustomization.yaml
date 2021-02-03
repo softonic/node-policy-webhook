@@ -11,4 +11,4 @@ resources:
 - gcpauthpolicyprofile-controller-sa.yaml
 - gcpauthpolicyprofile-controller-svc.yaml
 - gcpauthpolicyprofile-mutwebhookcfg.yaml
-- gcpauthpolicyprofiles.gcpauthpolicy.nuxeo.io-crd.yaml
+- profiles.gcpauthpolicy.nuxeo.io-crd.yaml

@@ -24,7 +24,7 @@ func (e *profileDecorator) Create(evt event.CreateEvent, q workqueue.RateLimitin
 }
 
 func (e *profileDecorator) Update(evt event.UpdateEvent, q workqueue.RateLimitingInterface) {
-	if !reflect.DeepEqual(evt.ObjectOld.(*gcpauthpolicy_api.GCPAuthPolicyProfile).Spec, evt.ObjectNew.(*gcpauthpolicy_api.GCPAuthPolicyProfile).Spec) {
+	if !reflect.DeepEqual(evt.ObjectOld.(*gcpauthpolicy_api.Profile).Spec, evt.ObjectNew.(*gcpauthpolicy_api.Profile).Spec) {
 		log.Log.WithValues("policy", evt.ObjectNew.GetName()).Info(
 			fmt.Sprintf("%T/%s has been updated", evt.ObjectNew, evt.ObjectNew.GetName()))
 	}

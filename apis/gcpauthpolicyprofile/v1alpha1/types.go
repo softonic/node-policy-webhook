@@ -5,11 +5,17 @@
 package v1alpha1
 
 import (
-	"fmt"
-
 	meta_api "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
+)
+
+const (
+	ProfileKey KeyValue = "gcpauthpolicy.nuxeo.io/profile"
+	TypeKey    KeyValue = "gcpauthpolicy.nuxeo.io/type"
+	WatchKey   KeyValue = "gcpauthpolicy.nuxeo.io/watch"
+
+	ImagePullSecretTypeValue TypeValue = "ImagePullSecret"
 )
 
 var (
@@ -22,7 +28,7 @@ var (
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
 
-	GCPAuthpolicyprofilesResource = SchemeGroupVersion.WithResource("gcpauthpolicyprofiles")
+	ProfilesResource = SchemeGroupVersion.WithResource("profiles")
 )
 
 type ResourceKind string
@@ -32,79 +38,77 @@ func (name ResourceKind) String() string {
 }
 
 const (
-	GCPAuthpolicyprofileKind ResourceKind = "GCPAuthPolicyProfile"
+	ProfileKind ResourceKind = "Profile"
 )
 
-// Key typed gcpauth annotation identifiers
-type Key string
+// KeyValue typed gcpauth annotation identifiers
+type KeyValue string
 
-func (name Key) String() string {
+func (name KeyValue) String() string {
 	return string(name)
 }
 
-const (
-	ProfileKey Key = "gcpauthpolicy.nuxeo.io/profile"
-	WatchKey   Key = "gcpauthpolicy.nuxeo.io/watch"
-)
+type TypeValue string
+
+func (name TypeValue) String() string {
+	return string(name)
+}
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 
 // GCPAuthProfile is the schema for the GCPAuthPolicy profile API
-type GCPAuthPolicyProfile struct {
+type Profile struct {
 	meta_api.TypeMeta   `json:",inline"`
 	meta_api.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GCPAuthPolicyProfileSpec   `json:"spec,omitempty"`
-	Status GCPAuthPolicyProfileStatus `json:"status,omitempty"`
+	Spec   ProfileSpec   `json:"spec,omitempty"`
+	Status ProfileStatus `json:"status,omitempty"`
 }
 
-type GCPAuthPolicyProfileSpec struct {
-	GCPAuthDatasource   `json:"datasource,omitempty"`
-	GCPAuthFeatureGates `json:"features,omitempty"`
+type ProfileSpec struct {
+	Storage      `json:"storage,omitempty"`
+	Datasource   `json:"datasource,omitempty"`
+	FeatureGates `json:"features,omitempty"`
 }
 
-type GCPAuthFeatureGates struct {
-	ImagePullSecretsInjection GCPAuthFeatureGate `json:"imagePullSecrets,omitempty"`
+type Storage struct {
+	NamespaceStorage `json:"namespace,omitempty"`
 }
 
-type GCPAuthFeatureGate struct {
+type NamespaceStorage struct {
+	Name string `json:"name,omitempty"`
+}
+
+type FeatureGates struct {
+	ImagePullSecretsInjection FeatureGate `json:"imagePullSecrets,omitempty"`
+}
+
+type FeatureGate struct {
 	Enabled bool `json:"enabled,omitempty"`
 }
-type GCPAuthDatasource struct {
-	GCPAuthSecretDatasource `json:"secret,omitempty"`
+type Datasource struct {
+	SecretDatasource `json:"secret,omitempty"`
 }
 
-type GCPAuthSecretDatasource struct {
+type SecretDatasource struct {
 	Namespace string `json:"namespace,omitempty"`
 	Name      string `json:"name,omitempty"`
 }
 
-func (s *GCPAuthPolicyProfileSpec) Path() string {
-	return fmt.Sprintf("%s/%s", s.Namespace(), s.Name())
-}
-
-func (s *GCPAuthPolicyProfileSpec) Name() string {
-	return s.GCPAuthDatasource.GCPAuthSecretDatasource.Name
-}
-
-func (s *GCPAuthPolicyProfileSpec) Namespace() string {
-	return s.GCPAuthDatasource.GCPAuthSecretDatasource.Namespace
-}
-
 // +kubebuilder:object:root=true
 
-// GCPAuthPolicyProfileList contains a list of GCPAuthPolicyProfile
-type GCPAuthPolicyProfileList struct {
+// ProfileList contains a list of GCPAuthPolicyProfile
+type ProfileList struct {
 	meta_api.TypeMeta `json:",inline"`
 	meta_api.ListMeta `json:"metadata,omitempty"`
-	Items             []GCPAuthPolicyProfile `json:"items"`
+	Items             []Profile `json:"items"`
 }
 
-// GCPAuthPolicyProfileStatus the status
-type GCPAuthPolicyProfileStatus struct {
+// ProfileStatus the status
+type ProfileStatus struct {
 }
 
 func init() {
-	SchemeBuilder.Register(&GCPAuthPolicyProfile{}, &GCPAuthPolicyProfileList{})
+	SchemeBuilder.Register(&Profile{}, &ProfileList{})
 }

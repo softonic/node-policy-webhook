@@ -2,9 +2,9 @@ package reviewer
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/gcpauthpolicy/k8s"
+	"github.com/pkg/errors"
 
 	gcpauth_api "github.com/nuxeo/k8s-policy-controller/apis/gcpauthpolicyprofile/v1alpha1"
 	core_api "k8s.io/api/core/v1"
@@ -20,13 +20,13 @@ type (
 	RequestedServiceAccountStage struct {
 		k8s.Interface
 		*spi.GivenStage
-		ServiceAccount       core_api.ServiceAccount
-		GCPAuthPolicyProfile gcpauth_api.GCPAuthPolicyProfile
+		ServiceAccount core_api.ServiceAccount
+		Profile        gcpauth_api.Profile
 	}
 
 	FeatureGateStage struct {
 		*RequestedProfileStage
-		*gcpauth_api.GCPAuthFeatureGate
+		*gcpauth_api.FeatureGate
 	}
 
 	FeatureGateField   int
@@ -101,20 +101,10 @@ func (s *RequestedProfileStage) Exists() *RequestedProfileStage {
 		s.Allow(err)
 		return s
 	}
-	s.GCPAuthPolicyProfile = *profile
+	s.Profile = *profile
 
-	s.Logger = s.Logger.WithValues("profile", s.GCPAuthPolicyProfile.ObjectMeta.Name)
+	s.Logger = s.Logger.WithValues("profile", s.Profile.ObjectMeta.Name)
 
-	return s
-}
-
-func (s *RequestedProfileStage) SecretIsAvailable() *RequestedProfileStage {
-	if !s.CanContinue() {
-		return s
-	}
-	if err := s.Interface.EnsureSecretExist(s.AdmissionRequest.Namespace, &s.GCPAuthPolicyProfile); err != nil {
-		s.Fail(errors.New("Policy secret unavailable"))
-	}
 	return s
 }
 
@@ -122,7 +112,7 @@ func (s *RequestedProfileStage) FeatureGate(field FeatureGateField) *FeatureGate
 	if !s.CanContinue() {
 		return &FeatureGateStage{
 			RequestedProfileStage: s,
-			GCPAuthFeatureGate:    nil,
+			FeatureGate:           nil,
 		}
 	}
 
@@ -130,14 +120,14 @@ func (s *RequestedProfileStage) FeatureGate(field FeatureGateField) *FeatureGate
 	case ImagePullSecretsFeatureGate:
 		return &FeatureGateStage{
 			RequestedProfileStage: s,
-			GCPAuthFeatureGate:    &s.GCPAuthPolicyProfile.Spec.GCPAuthFeatureGates.ImagePullSecretsInjection}
+			FeatureGate:           &s.Profile.Spec.FeatureGates.ImagePullSecretsInjection}
 	}
 
 	s.Fail(errors.New("should never reach this code"))
 
 	return &FeatureGateStage{
 		RequestedProfileStage: s,
-		GCPAuthFeatureGate:    nil,
+		FeatureGate:           nil,
 	}
 }
 
@@ -145,8 +135,27 @@ func (s *FeatureGateStage) IsEnabled() *FeatureGateStage {
 	if !s.CanContinue() {
 		return s
 	}
-	if !s.GCPAuthFeatureGate.Enabled {
+	if !s.FeatureGate.Enabled {
 		s.Allow(nil)
+	}
+	return s
+}
+
+func (s *FeatureGateStage) The() *FeatureGateStage {
+	return s
+}
+
+func (s *FeatureGateStage) And() *FeatureGateStage {
+	return s
+}
+
+func (s *FeatureGateStage) SecretIsAvailable() *FeatureGateStage {
+	if !s.CanContinue() {
+		return s
+	}
+	err := s.Interface.EnsureNamespaceImagePullSecret(&s.Profile, s.ServiceAccount.ObjectMeta.Namespace)
+	if err != nil {
+		s.Fail(errors.Wrap(err, "Cannot ensure we have an image pull secret available"))
 	}
 	return s
 }
@@ -171,7 +180,7 @@ func (s *RequestedServiceAccountStage) End() *spi.WhenStage {
 	return &spi.WhenStage{
 		GivenStage: s.GivenStage,
 		Patcher: &serviceaccountPatcher{
-			ServiceAccount:       &s.ServiceAccount,
-			GCPAuthPolicyProfile: &s.GCPAuthPolicyProfile,
+			ServiceAccount: &s.ServiceAccount,
+			Profile:        &s.Profile,
 		}}
 }

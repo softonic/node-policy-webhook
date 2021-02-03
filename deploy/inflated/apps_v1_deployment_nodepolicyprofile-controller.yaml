@@ -1,26 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    app.kubernetes.io/instance: nodepolicyprofile
+    app.kubernetes.io/name: k8s-policy-controller
   name: nodepolicyprofile-controller
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/instance: nodepolicyprofile-controller
-      app.kubernetes.io/name: nodepolicyprofile-controller
+      app.kubernetes.io/instance: nodepolicyprofile
+      app.kubernetes.io/name: k8s-policy-controller
   template:
     metadata:
       labels:
         app: k8s-policy-controller
+        app.kubernetes.io/instance: nodepolicyprofile
+        app.kubernetes.io/name: k8s-policy-controller
         instance: nodepolicyprofile
-        app.kubernetes.io/instance: nodepolicyprofile-controller
-        app.kubernetes.io/name: nodepolicyprofile-controller
     spec:
       containers:
       - args:
-        - --zap-devel
-        - --kind=nodepolicyprofile
+        - --namespace=$POD_NAMESPACE
         env:
+          name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         image: k8s-policy-controller
         imagePullPolicy: Always
         livenessProbe:

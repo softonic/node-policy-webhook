@@ -16,7 +16,7 @@ type (
 		k8s.Interface
 		*reviewer_spi.GivenStage
 		*core_api.Pod
-		Profile *nodepolicy_api.NodePolicyProfile
+		Profile *nodepolicy_api.Profile
 	}
 
 	RequestedKindStage struct {

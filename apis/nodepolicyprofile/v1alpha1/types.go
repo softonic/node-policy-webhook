@@ -30,7 +30,7 @@ func (name ResourceName) String() string {
 }
 
 var (
-	NodepolicyprofilesResource = SchemeBuilder.GroupVersion.WithResource("nodepolicyprofiles")
+	NodepolicyprofilesResource = SchemeBuilder.GroupVersion.WithResource("profiles")
 	PodsResource               = core_api.SchemeGroupVersion.WithResource("pods")
 )
 
@@ -48,15 +48,15 @@ const (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// NodePolicyProfileSpec defines the desired state of NodePolicyProfile
-type NodePolicyProfileSpec struct {
+// ProfileSpec defines the desired state of NodePolicyProfile
+type ProfileSpec struct {
 	Tolerations  []core_api.Toleration `json:"tolerations,omitempty"`
 	NodeAffinity core_api.NodeAffinity `json:"nodeAffinity,omitempty"`
 	NodeSelector map[string]string     `json:"nodeSelector,omitempty"`
 }
 
-// NodePolicyProfileStatus defines the observed state of NodePolicyProfile
-type NodePolicyProfileStatus struct {
+// ProfileStatus defines the observed state of NodePolicyProfile
+type ProfileStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -64,24 +64,24 @@ type NodePolicyProfileStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 
-// NodePolicyProfile is the Schema for the nodepolicyprofiles API
-type NodePolicyProfile struct {
+// Profile is the Schema for the nodepolicyprofiles API
+type Profile struct {
 	meta_api.TypeMeta   `json:",inline"`
 	meta_api.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   NodePolicyProfileSpec   `json:"spec,omitempty"`
-	Status NodePolicyProfileStatus `json:"status,omitempty"`
+	Spec   ProfileSpec   `json:"spec,omitempty"`
+	Status ProfileStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// NodePolicyProfileList contains a list of NodePolicyProfile
-type NodePolicyProfileList struct {
+// ProfileList contains a list of NodePolicyProfile
+type ProfileList struct {
 	meta_api.TypeMeta `json:",inline"`
 	meta_api.ListMeta `json:"metadata,omitempty"`
-	Items             []NodePolicyProfile `json:"items"`
+	Items             []Profile `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&NodePolicyProfile{}, &NodePolicyProfileList{})
+	SchemeBuilder.Register(&Profile{}, &ProfileList{})
 }

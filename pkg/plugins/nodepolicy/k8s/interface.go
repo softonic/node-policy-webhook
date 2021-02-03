@@ -19,7 +19,7 @@ type Interface struct {
 	*spi.Interface
 }
 
-func (s *Interface) ResolveProfile(namespace *meta_api.ObjectMeta, resource *meta_api.ObjectMeta) (*nodepolicy_api.NodePolicyProfile, error) {
+func (s *Interface) ResolveProfile(namespace *meta_api.ObjectMeta, resource *meta_api.ObjectMeta) (*nodepolicy_api.Profile, error) {
 	annotations := make(map[string]string)
 	annotations = s.MergeAnnotations(annotations, namespace)
 	annotations = s.MergeAnnotations(annotations, resource)
@@ -29,12 +29,12 @@ func (s *Interface) ResolveProfile(namespace *meta_api.ObjectMeta, resource *met
 	return nil, errors.New("Annotation not found")
 }
 
-func (s *Interface) GetProfile(name string) (*nodepolicy_api.NodePolicyProfile, error) {
+func (s *Interface) GetProfile(name string) (*nodepolicy_api.Profile, error) {
 	resp, err := s.Interface.Resource(NodepolicyprofilesResources).Get(context.TODO(), name, meta_api.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
-	profile := &nodepolicy_api.NodePolicyProfile{}
+	profile := &nodepolicy_api.Profile{}
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(resp.UnstructuredContent(), profile)
 	if err != nil {
 		return nil, err

@@ -11,7 +11,7 @@ import (
 
 type patcher struct {
 	*core_api.Pod
-	*nodepolicy_api.NodePolicyProfile
+	*nodepolicy_api.Profile
 	Patch []reviewer.PatchOperation
 }
 
@@ -30,7 +30,7 @@ func (p *patcher) addLabelProfilePatch() []reviewer.PatchOperation {
 	return append(p.Patch, reviewer.PatchOperation{
 		Op:    "add",
 		Path:  "/metadata/labels/nodepolicy.nuxeo.io~1profile",
-		Value: p.NodePolicyProfile.Name})
+		Value: p.Profile.Name})
 }
 
 func (p *patcher) addNodeProfilePatch() []reviewer.PatchOperation {
@@ -42,17 +42,17 @@ func (p *patcher) addNodeProfilePatch() []reviewer.PatchOperation {
 	return append(p.Patch, reviewer.PatchOperation{
 		Op:    "add",
 		Path:  "/metadata/annotations/nodepolicy.nuxeo.io~1profile",
-		Value: p.NodePolicyProfile.Name})
+		Value: p.Profile.Name})
 }
 
 func (p *patcher) addNodeAffinityPatch() []reviewer.PatchOperation {
-	if reflect.DeepEqual(p.NodePolicyProfile.Spec.NodeAffinity, core_api.NodeAffinity{}) {
+	if reflect.DeepEqual(p.Profile.Spec.NodeAffinity, core_api.NodeAffinity{}) {
 		return p.Patch
 	}
 
 	affinity := core_api.Affinity{}
 
-	affinity.NodeAffinity = &p.NodePolicyProfile.Spec.NodeAffinity
+	affinity.NodeAffinity = &p.Profile.Spec.NodeAffinity
 
 	if p.Pod.Spec.Affinity != nil {
 		if p.Pod.Spec.Affinity.PodAntiAffinity != nil {
@@ -72,7 +72,7 @@ func (p *patcher) addNodeAffinityPatch() []reviewer.PatchOperation {
 }
 
 func (p *patcher) addTolerationsPatch() []reviewer.PatchOperation {
-	if p.Pod.Spec.Tolerations == nil && p.NodePolicyProfile.Spec.Tolerations == nil {
+	if p.Pod.Spec.Tolerations == nil && p.Profile.Spec.Tolerations == nil {
 		return p.Patch
 	}
 	tolerations := []core_api.Toleration{}
@@ -82,7 +82,7 @@ func (p *patcher) addTolerationsPatch() []reviewer.PatchOperation {
 	tolerationEqual := false
 
 	for _, tolerationPod := range p.Pod.Spec.Tolerations {
-		for _, tolerationProfile := range p.NodePolicyProfile.Spec.Tolerations {
+		for _, tolerationProfile := range p.Profile.Spec.Tolerations {
 			if reflect.DeepEqual(tolerationPod, tolerationProfile) {
 				tolerationEqual = true
 			}
@@ -90,7 +90,7 @@ func (p *patcher) addTolerationsPatch() []reviewer.PatchOperation {
 	}
 
 	if tolerationEqual == false {
-		tolerations = append(tolerations, p.NodePolicyProfile.Spec.Tolerations...)
+		tolerations = append(tolerations, p.Profile.Spec.Tolerations...)
 	}
 
 	return append(p.Patch, reviewer.PatchOperation{
@@ -101,13 +101,13 @@ func (p *patcher) addTolerationsPatch() []reviewer.PatchOperation {
 }
 
 func (p *patcher) addNodeSelectorPatch() []reviewer.PatchOperation {
-	if p.NodePolicyProfile.Spec.NodeSelector == nil {
+	if p.Profile.Spec.NodeSelector == nil {
 		return p.Patch
 	}
 
 	nodeSelector := make(map[string]string)
 
-	for key, value := range p.NodePolicyProfile.Spec.NodeSelector {
+	for key, value := range p.Profile.Spec.NodeSelector {
 		nodeSelector[key] = value
 	}
 

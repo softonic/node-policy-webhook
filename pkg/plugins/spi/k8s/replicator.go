@@ -13,11 +13,6 @@ import (
 const ReplicateKey string = "replicator.v1.mittwald.de/replicate-from"
 
 type (
-	ReplicatorSource interface {
-		Name() string
-		Namespace() string
-	}
-
 	Replicator struct {
 		dynamic.Interface
 	}
@@ -27,7 +22,7 @@ var (
 	SecretsResource = core_api.SchemeGroupVersion.WithResource("secrets")
 )
 
-func (f *Replicator) CreateReplicatedSecret(secret *core_api.Secret, source ReplicatorSource) (*core_api.Secret, error) {
+func (f *Replicator) CreateReplicatedSecret(secret *core_api.Secret, namespace string, name string) (*core_api.Secret, error) {
 	secret.TypeMeta = meta_api.TypeMeta{
 		Kind:       "Secret",
 		APIVersion: SecretsResource.Version,
@@ -35,7 +30,7 @@ func (f *Replicator) CreateReplicatedSecret(secret *core_api.Secret, source Repl
 	if secret.ObjectMeta.Annotations == nil {
 		secret.ObjectMeta.Annotations = map[string]string{}
 	}
-	secret.ObjectMeta.Annotations[ReplicateKey] = path(source)
+	secret.ObjectMeta.Annotations[ReplicateKey] = replicateValue(namespace, name)
 
 	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(secret)
 	if err != nil {
@@ -57,8 +52,8 @@ func (f *Replicator) CreateReplicatedSecret(secret *core_api.Secret, source Repl
 	return secret, nil
 }
 
-func (f *Replicator) UpdateReplicatedSecret(secret *core_api.Secret, source ReplicatorSource) (*core_api.Secret, error) {
-	secret.ObjectMeta.Annotations[ReplicateKey] = path(source)
+func (f *Replicator) UpdateReplicatedSecret(secret *core_api.Secret, namespace string, name string) (*core_api.Secret, error) {
+	secret.ObjectMeta.Annotations[ReplicateKey] = replicateValue(namespace, name)
 
 	data, err := runtime.DefaultUnstructuredConverter.ToUnstructured(secret)
 	if err != nil {
@@ -78,6 +73,6 @@ func (f *Replicator) UpdateReplicatedSecret(secret *core_api.Secret, source Repl
 	return secret, nil
 }
 
-func path(s ReplicatorSource) string {
-	return s.Namespace() + "/" + s.Name()
+func replicateValue(namespace string, name string) string {
+	return namespace + "/" + name
 }

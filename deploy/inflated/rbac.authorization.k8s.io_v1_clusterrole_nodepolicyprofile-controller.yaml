@@ -1,10 +1,11 @@
-
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: gcpauthpolicyprofile-controller
+  labels:
+    app.kubernetes.io/instance: nodepolicyprofile
+    app.kubernetes.io/name: k8s-policy-controller
+  name: nodepolicyprofile-controller
 rules:
 - apiGroups:
   - ""
@@ -13,15 +14,9 @@ rules:
   verbs:
   - get
 - apiGroups:
-  - ""
+  - nodepolicy.nuxeo.io
   resources:
-  - secrets
-  verbs:
-  - '*'
-- apiGroups:
-  - gcpauthpolicy.nuxeo.io
-  resources:
-  - profiles
+  - nodepolicyprofiles
   verbs:
   - create
   - delete
@@ -31,9 +26,9 @@ rules:
   - update
   - watch
 - apiGroups:
-  - gcpauthpolicy.nuxeo.io
+  - nodepolicy.nuxeo.io
   resources:
-  - profiles/status
+  - nodepolicyprofiles/status
   verbs:
   - get
   - patch
