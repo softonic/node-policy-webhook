@@ -1,11 +1,11 @@
-BIN := admission-webhook-controller
+BIN := k8s-policy-controller
 CRD_OPTIONS ?= "crd:trivialVersions=true"
-PKG := github.com/nxmatic/admission-webhook-server
+PKG := github.com/nuxeo/k8s-policy-server
 ARCH ?= amd64
-APP ?= admission-webhook-controller
+APP ?= k8s-policy-controller
 NAMESPACE ?= default
-RELEASE_NAME ?= admission-webhook-controller
-KO_DOCKER_REPO = registry.softonic.io/admission-webhook-controller
+RELEASE_NAME ?= k8s-policy-controller
+KO_DOCKER_REPO = registry.softonic.io/k8s-policy-controller
 REPOSITORY ?= gcr.io/build-jx-prod/library
 VERSION ?= "$(shell git describe --tags | sed 's/^v//')"
 VERSION_PKG ?= $(PKG)/pkg/version
@@ -33,7 +33,7 @@ kubectl-neat.bin := $(if $(kubectl-neat.bin),$(kubectl-neat.bin),/usr/local/bin/
 
 .ONESHELL:
 
-deploy-prod: export IMAGE_GEN = "github.com/softonic/admission-webhook-controller/cmd/admission-webhook-controller"
+deploy-prod: export IMAGE_GEN = "github.com/softonic/k8s-policy-controller/cmd/k8s-policy-controller"
 
 deploy:  export IMAGE_GEN = $(APP):$(VERSION)
 

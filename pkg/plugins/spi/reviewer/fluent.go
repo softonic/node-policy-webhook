@@ -6,7 +6,7 @@ import (
 	admission_api "k8s.io/api/admission/v1"
 	"k8s.io/client-go/dynamic"
 
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi/k8s"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi/k8s"
 )
 
 type responseType int8

@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       labels:
-        app: admission-webhook-controller
+        app: k8s-policy-controller
         instance: nodepolicyprofile
         app.kubernetes.io/instance: nodepolicyprofile-controller
         app.kubernetes.io/name: nodepolicyprofile-controller
@@ -21,7 +21,7 @@ spec:
         - --zap-devel
         - --kind=nodepolicyprofile
         env:
-        image: admission-webhook-controller
+        image: k8s-policy-controller
         imagePullPolicy: Always
         livenessProbe:
           httpGet:

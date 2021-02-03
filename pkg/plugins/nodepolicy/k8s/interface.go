@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	nodepolicy_api "github.com/nxmatic/admission-webhook-controller/apis/nodepolicyprofile/v1alpha1"
+	nodepolicy_api "github.com/nuxeo/k8s-policy-controller/apis/nodepolicyprofile/v1alpha1"
 	meta_api "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	spi "github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi/k8s"
+	spi "github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi/k8s"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 

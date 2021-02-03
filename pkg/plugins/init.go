@@ -1,10 +1,10 @@
 package plugins
 
 import (
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi"
 
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/gcpauthpolicy"
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/nodepolicy"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/gcpauthpolicy"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/nodepolicy"
 )
 
 var (

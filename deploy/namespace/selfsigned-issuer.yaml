@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   labels:
-    app.kubernetes.io/name: admission-webhook-controller
+    app.kubernetes.io/name: k8s-policy-controller
   name: selfsigned
 spec:
   selfSigned: {}

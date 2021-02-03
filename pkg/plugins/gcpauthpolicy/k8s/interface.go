@@ -7,12 +7,12 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/dynamic"
 
-	gcpauth_api "github.com/nxmatic/admission-webhook-controller/apis/gcpauthpolicyprofile/v1alpha1"
+	gcpauth_api "github.com/nuxeo/k8s-policy-controller/apis/gcpauthpolicyprofile/v1alpha1"
 	"github.com/pkg/errors"
 	core_api "k8s.io/api/core/v1"
 	meta_api "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	k8s_spi "github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi/k8s"
+	k8s_spi "github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi/k8s"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 

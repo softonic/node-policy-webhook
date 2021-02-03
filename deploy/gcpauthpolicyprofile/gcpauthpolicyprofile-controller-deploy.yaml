@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       labels:
-        app: admission-webhook-controller
+        app: k8s-policy-controller
         instance: gcpauthpolicyprofile
         app.kubernetes.io/instance: gcpauthpolicyprofile-controller
         app.kubernetes.io/name: gcpauthpolicyprofile-controller
@@ -19,7 +19,7 @@ spec:
       containers:
       - args:
         - --kind=gcpauthpolicyprofile
-        image: admission-webhook-controller:latest
+        image: k8s-policy-controller:latest
         imagePullPolicy: Always
         livenessProbe:
           httpGet:

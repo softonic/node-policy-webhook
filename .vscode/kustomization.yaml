@@ -1,8 +1,8 @@
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
-namespace: admission-webhooks
+namespace: k8s-policys
 commonLabels:
-  app.kubernetes.io/name: admission-webhook-controller
+  app.kubernetes.io/name: k8s-policy-controller
 namespace: policies
 resources:
   - ../deploy
@@ -18,6 +18,6 @@ images:
   - name: golang
     newName: pop-os.home:5000/library/golang
     newTag: 1.14-buster-supervisor
-  - name: admission-webhook-controller
-    newName: pop-os.home:5000/library/admission-webhook-controller
+  - name: k8s-policy-controller
+    newName: pop-os.home:5000/library/k8s-policy-controller
     newTag: latest

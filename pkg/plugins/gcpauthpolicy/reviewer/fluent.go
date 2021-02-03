@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/gcpauthpolicy/k8s"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/gcpauthpolicy/k8s"
 
-	gcpauth_api "github.com/nxmatic/admission-webhook-controller/apis/gcpauthpolicyprofile/v1alpha1"
+	gcpauth_api "github.com/nuxeo/k8s-policy-controller/apis/gcpauthpolicyprofile/v1alpha1"
 	core_api "k8s.io/api/core/v1"
 
-	spi "github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi/reviewer"
+	spi "github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi/reviewer"
 )
 
 type (

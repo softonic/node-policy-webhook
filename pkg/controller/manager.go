@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi"
 
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"

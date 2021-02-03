@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins"
 )
 
 // ServerOptions from cert-managed with reviewer kind selection

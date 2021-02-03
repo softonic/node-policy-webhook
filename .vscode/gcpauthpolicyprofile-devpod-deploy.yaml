@@ -21,7 +21,7 @@ spec:
       labels:
         devpod: gcpauthpolicyprofile-controller
         app.kubernetes.io/instance: gcpauthpolicyprofile
-        app.kubernetes.io/name: admission-webhook-controller
+        app.kubernetes.io/name: k8s-policy-controller
     spec:
       containers:
         - image: golang:1.14-buster

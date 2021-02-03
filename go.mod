@@ -1,9 +1,8 @@
-module github.com/nxmatic/admission-webhook-controller
+module github.com/nuxeo/k8s-policy-controller
 
 go 1.15
 
 require (
-	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v0.4.0
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect

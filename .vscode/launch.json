@@ -9,8 +9,8 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder:admission-webhook-controller}/main.go",
-            "cwd": "${workspaceFolder:admission-webhook-controller}",
+            "program": "${workspaceFolder:k8s-policy-controller}/main.go",
+            "cwd": "${workspaceFolder:k8s-policy-controller}",
             "args": [
                 "--zap-devel",
                 "--zap-encoder=console",
@@ -23,8 +23,8 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder:admission-webhook-controller}/main.go",
-            "cwd": "${workspaceFolder:admission-webhook-controller}",
+            "program": "${workspaceFolder:k8s-policy-controller}/main.go",
+            "cwd": "${workspaceFolder:k8s-policy-controller}",
             "args": [
                 "--zap-devel",
                 "--zap-encoder=console",

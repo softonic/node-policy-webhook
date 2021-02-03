@@ -5,6 +5,6 @@ ssl/*.pem
 /vendor
 /manifest.yaml
 chart/node-policy-webhook/secret.values.yaml
-admission-webhook-controller
+k8s-policy-controller
 *~
 /.local

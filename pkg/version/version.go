@@ -13,7 +13,7 @@ var (
 
 // Version holds this Controller's version as well as the version of some of the components it uses.
 type Version struct {
-	Controller string `json:"admission-webhook-controller"`
+	Controller string `json:"k8s-policy-controller"`
 	BuildDate  string `json:"build-date"`
 	Go         string `json:"go-version"`
 }

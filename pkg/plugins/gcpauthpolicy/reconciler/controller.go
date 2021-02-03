@@ -1,8 +1,8 @@
 package reconciler
 
 import (
-	gcpauthpolicy_api "github.com/nxmatic/admission-webhook-controller/apis/gcpauthpolicyprofile/v1alpha1"
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/gcpauthpolicy/k8s"
+	gcpauthpolicy_api "github.com/nuxeo/k8s-policy-controller/apis/gcpauthpolicyprofile/v1alpha1"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/gcpauthpolicy/k8s"
 
 	"github.com/pkg/errors"
 	core_api "k8s.io/api/core/v1"

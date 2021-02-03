@@ -8,10 +8,10 @@ import (
 
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins"
 
-	"github.com/nxmatic/admission-webhook-controller/pkg/controller"
-	"github.com/nxmatic/admission-webhook-controller/pkg/version"
+	"github.com/nuxeo/k8s-policy-controller/pkg/controller"
+	"github.com/nuxeo/k8s-policy-controller/pkg/version"
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -33,7 +33,7 @@ func main() {
 	ctrl.SetLogger(logger)
 
 	logger.Info("Starting the admission webhook controller",
-		"admission-webhook-controller", v.Controller,
+		"k8s-policy-controller", v.Controller,
 		"build-date", v.BuildDate,
 		"go-version", v.Go,
 		"go-arch", runtime.GOARCH,
@@ -53,7 +53,7 @@ func main() {
 		MetricsBindAddress: ctrlOptions.MetricsAddr,
 		Port:               9443,
 		LeaderElection:     ctrlOptions.EnableLeaderElection,
-		LeaderElectionID:   fmt.Sprintf("admission-webhook-controller/%s", ctrlOptions.PolicyOption),
+		LeaderElectionID:   fmt.Sprintf("k8s-policy-controller/%s", ctrlOptions.PolicyOption),
 		Logger:             logger,
 	}
 

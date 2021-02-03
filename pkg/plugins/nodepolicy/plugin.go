@@ -1,10 +1,10 @@
 package nodepolicy
 
 import (
-	nodepolicy_api "github.com/nxmatic/admission-webhook-controller/apis/nodepolicyprofile/v1alpha1"
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/nodepolicy/reviewer"
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi"
-	reviewer_spi "github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi/reviewer"
+	nodepolicy_api "github.com/nuxeo/k8s-policy-controller/apis/nodepolicyprofile/v1alpha1"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/nodepolicy/reviewer"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi"
+	reviewer_spi "github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi/reviewer"
 	"github.com/pkg/errors"
 	core_api "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"

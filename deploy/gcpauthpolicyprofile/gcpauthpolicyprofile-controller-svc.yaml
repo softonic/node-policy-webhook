@@ -9,6 +9,6 @@ spec:
     protocol: TCP
     targetPort: webhook-server
   selector:
-    app.kubernetes.io/instance: admission-webhook-controller
-    app.kubernetes.io/name: admission-webhook-controller
+    app.kubernetes.io/instance: k8s-policy-controller
+    app.kubernetes.io/name: k8s-policy-controller
   type: ClusterIP

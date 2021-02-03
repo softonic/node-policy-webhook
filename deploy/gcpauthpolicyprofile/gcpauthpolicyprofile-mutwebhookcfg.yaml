@@ -19,7 +19,7 @@ webhooks:
     - key: app
       operator: NotIn
       values:
-      - admission-webhook-controller
+      - k8s-policy-controller
   reinvocationPolicy: Never
   rules:
   - apiGroups:

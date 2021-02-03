@@ -7,9 +7,9 @@ import (
 	core_api "k8s.io/api/core/v1"
 	errors_api "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/nxmatic/admission-webhook-controller/apis/gcpauthpolicyprofile/v1alpha1"
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/gcpauthpolicy/k8s"
-	k8s_spi "github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi/k8s"
+	"github.com/nuxeo/k8s-policy-controller/apis/gcpauthpolicyprofile/v1alpha1"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/gcpauthpolicy/k8s"
+	k8s_spi "github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi/k8s"
 
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )

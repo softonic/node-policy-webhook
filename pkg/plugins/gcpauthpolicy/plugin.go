@@ -1,11 +1,11 @@
 package gcpauthpolicy
 
 import (
-	gcpauth_api "github.com/nxmatic/admission-webhook-controller/apis/gcpauthpolicyprofile/v1alpha1"
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/gcpauthpolicy/reconciler"
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/gcpauthpolicy/reviewer"
-	"github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi"
-	reviewer_spi "github.com/nxmatic/admission-webhook-controller/pkg/plugins/spi/reviewer"
+	gcpauth_api "github.com/nuxeo/k8s-policy-controller/apis/gcpauthpolicyprofile/v1alpha1"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/gcpauthpolicy/reconciler"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/gcpauthpolicy/reviewer"
+	"github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi"
+	reviewer_spi "github.com/nuxeo/k8s-policy-controller/pkg/plugins/spi/reviewer"
 	"github.com/pkg/errors"
 	core_api "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
