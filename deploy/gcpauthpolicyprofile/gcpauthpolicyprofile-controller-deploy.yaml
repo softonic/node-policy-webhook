@@ -23,13 +23,16 @@ spec:
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
-            path: /
-            port: webhook-server
-            scheme: HTTPS
+            path: /metrics
+            port: metrics-server
+            scheme: HTTP
         name: k8s-policy-controller
         ports:
         - containerPort: 9443
           name: webhook-server
+          protocol: TCP
+        - containerPort: 8080
+          name: metrics-server
           protocol: TCP
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
@@ -37,9 +40,9 @@ spec:
           readOnly: true
         readinessProbe:
           httpGet:
-            path: /
-            port: webhook-server
-            scheme: HTTPS
+            path: /metrics
+            port: metrics-server
+            scheme: HTTP
         resources: {}
         securityContext: {}
       securityContext: {}
