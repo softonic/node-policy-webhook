@@ -9,6 +9,5 @@ resources:
 - nodepolicyprofile-controller-deploy.yaml
 - nodepolicyprofile-controller-sa.yaml
 - nodepolicyprofile-controller-svc.yaml
-- nodepolicyprofile-controller-tls-secret.yaml
 - nodepolicyprofile-mutwebhookcfg.yaml
 - profiles.nodepolicy.nuxeo.io-crd.yaml

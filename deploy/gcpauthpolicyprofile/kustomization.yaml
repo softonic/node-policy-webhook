@@ -4,7 +4,6 @@ commonLabels:
   app.kubernetes.io/instance: gcpauthpolicyprofile
 resources:
 - gcpauthpolicyprofile-controller-certificate.yaml
-- gcpauthpolicyprofile-controller-tls-secret.yaml
 - gcpauthpolicyprofile-controller-clusterrole.yaml
 - gcpauthpolicyprofile-controller-crb.yaml
 - gcpauthpolicyprofile-controller-deploy.yaml
