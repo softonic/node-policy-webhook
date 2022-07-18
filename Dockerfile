@@ -1,4 +1,4 @@
-FROM golang:1.14-buster AS build
+FROM golang:1.18-buster AS build
 
 ENV GOBIN=$GOPATH/bin
 
