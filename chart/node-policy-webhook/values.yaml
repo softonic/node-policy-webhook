@@ -18,6 +18,9 @@ webhook:
   timeoutSeconds: 5
   reinvocationPolicy: Never
   sideEffects: None
+  admissionReviewVersions:
+  - "v1beta1"
+  - "v1"
 
 # Secret containing webhook's cert name
 certs:
