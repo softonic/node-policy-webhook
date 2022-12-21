@@ -24,6 +24,7 @@ webhook:
 
 # Secret containing webhook's cert name
 certs:
+  defaultCreate: true
   mountPath: /etc/webhook/certs
   # Cert cert.pem
   cert: ""
